@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtTypeCell.cs" />
     <Compile Include="MainF.cs">
       <SubType>Form</SubType>
     </Compile>

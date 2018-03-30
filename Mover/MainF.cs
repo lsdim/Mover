@@ -18,7 +18,7 @@ namespace Mover
 
         private void MainF_Load(object sender, EventArgs e)
         {
-
+            
         }
 
         private void GV2_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -67,12 +67,20 @@ namespace Mover
             return rez;
         }
 
+        
+
         private void BAdd_Click(object sender, EventArgs e) //buttons "+" Click
         {
+            var daysOfWeek =
+                new[] { "Monday", "Tuesday", "Wednesday",
+                        "Thursday", "Friday", "Saturday",
+                        "Sunday" };
+
             switch (((Button)sender).Name)
             {
                 case "bAdd1":
                     RowAdd(GV1);
+                    GV1.Columns.Add(new ComboBoxColumn(daysOfWeek));                   
                     break;
                 case "bAdd2":
                     RowAdd(GV2);
@@ -121,7 +129,7 @@ namespace Mover
             }
         }
 
-        private void вихідToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CloseTSMenu_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Ви дійсно бажаєте завершити роботу? ", "Mover", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==DialogResult.Yes)
                 Close();

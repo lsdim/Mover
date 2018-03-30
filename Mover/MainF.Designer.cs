@@ -31,17 +31,18 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainF));
             this.nI1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.cMS1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.SettingTSMI = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.LogTSMI = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.CloseTSMI = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.bRem1 = new System.Windows.Forms.Button();
             this.bAdd1 = new System.Windows.Forms.Button();
             this.Sec = new System.Windows.Forms.NumericUpDown();
             this.p1 = new System.Windows.Forms.Panel();
             this.GV1 = new System.Windows.Forms.DataGridView();
-            this.NN = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DirList = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Stan = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.bRem2 = new System.Windows.Forms.Button();
             this.bAdd2 = new System.Windows.Forms.Button();
             this.p2 = new System.Windows.Forms.Panel();
@@ -49,12 +50,14 @@
             this.Ndir = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Path = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.cMS1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.налаштуванняToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.журналПодійToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.вихідToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.NN = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.test = new Mover.ComboBoxColumn(typeof(Mover.ComboBoxCell));
+            this.DirList = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Stan = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -63,7 +66,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.GV1)).BeginInit();
             this.p2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GV2)).BeginInit();
-            this.cMS1.SuspendLayout();
             this.SuspendLayout();
             // 
             // nI1
@@ -72,6 +74,48 @@
             this.nI1.Icon = ((System.Drawing.Icon)(resources.GetObject("nI1.Icon")));
             this.nI1.Text = "notifyIcon1";
             this.nI1.Visible = true;
+            // 
+            // cMS1
+            // 
+            this.cMS1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.SettingTSMI,
+            this.toolStripMenuItem1,
+            this.LogTSMI,
+            this.toolStripMenuItem2,
+            this.CloseTSMI});
+            this.cMS1.Name = "cMS1";
+            this.cMS1.ShowImageMargin = false;
+            this.cMS1.Size = new System.Drawing.Size(133, 82);
+            // 
+            // SettingTSMI
+            // 
+            this.SettingTSMI.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.SettingTSMI.Name = "SettingTSMI";
+            this.SettingTSMI.Size = new System.Drawing.Size(132, 22);
+            this.SettingTSMI.Text = "Налаштування";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(129, 6);
+            // 
+            // LogTSMI
+            // 
+            this.LogTSMI.Name = "LogTSMI";
+            this.LogTSMI.Size = new System.Drawing.Size(132, 22);
+            this.LogTSMI.Text = "Журнал подій";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(129, 6);
+            // 
+            // CloseTSMI
+            // 
+            this.CloseTSMI.Name = "CloseTSMI";
+            this.CloseTSMI.Size = new System.Drawing.Size(132, 22);
+            this.CloseTSMI.Text = "Вихід";
+            this.CloseTSMI.Click += new System.EventHandler(this.CloseTSMenu_Click);
             // 
             // splitContainer1
             // 
@@ -89,6 +133,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.comboBox1);
             this.splitContainer1.Panel2.Controls.Add(this.bRem2);
             this.splitContainer1.Panel2.Controls.Add(this.bAdd2);
             this.splitContainer1.Panel2.Controls.Add(this.p2);
@@ -143,6 +188,7 @@
             this.GV1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.NN,
+            this.test,
             this.DirList,
             this.Place,
             this.Mask,
@@ -152,45 +198,6 @@
             this.GV1.Name = "GV1";
             this.GV1.Size = new System.Drawing.Size(494, 181);
             this.GV1.TabIndex = 0;
-            // 
-            // NN
-            // 
-            this.NN.Frozen = true;
-            this.NN.HeaderText = "№";
-            this.NN.Name = "NN";
-            this.NN.ReadOnly = true;
-            this.NN.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.NN.Width = 30;
-            // 
-            // DirList
-            // 
-            this.DirList.HeaderText = "###";
-            this.DirList.Name = "DirList";
-            // 
-            // Place
-            // 
-            this.Place.HeaderText = "Місце призначення";
-            this.Place.Name = "Place";
-            // 
-            // Mask
-            // 
-            this.Mask.HeaderText = "Маска";
-            this.Mask.Name = "Mask";
-            // 
-            // Stan
-            // 
-            this.Stan.HeaderText = "Стан";
-            this.Stan.Items.AddRange(new object[] {
-            "0 - нічого не робити",
-            "1 - копіювати",
-            "2 - перемістити",
-            "3 - видалити",
-            "4 - запустити файл",
-            "5 - виконати командний рядок",
-            "6 - показати повідомлення",
-            "7 - перейменувати",
-            "8 - видалити всі крім вказаних"});
-            this.Stan.Name = "Stan";
             // 
             // bRem2
             // 
@@ -262,47 +269,57 @@
             this.Browse.Text = "...";
             this.Browse.ToolTipText = "Обрати папку";
             // 
-            // cMS1
+            // comboBox1
             // 
-            this.cMS1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.налаштуванняToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.журналПодійToolStripMenuItem,
-            this.toolStripMenuItem2,
-            this.вихідToolStripMenuItem});
-            this.cMS1.Name = "cMS1";
-            this.cMS1.ShowImageMargin = false;
-            this.cMS1.Size = new System.Drawing.Size(133, 104);
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(188, 142);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 3;
             // 
-            // налаштуванняToolStripMenuItem
+            // NN
             // 
-            this.налаштуванняToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.налаштуванняToolStripMenuItem.Name = "налаштуванняToolStripMenuItem";
-            this.налаштуванняToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.налаштуванняToolStripMenuItem.Text = "Налаштування";
+            this.NN.Frozen = true;
+            this.NN.HeaderText = "№";
+            this.NN.Name = "NN";
+            this.NN.ReadOnly = true;
+            this.NN.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.NN.Width = 30;
             // 
-            // журналПодійToolStripMenuItem
+            // test
             // 
-            this.журналПодійToolStripMenuItem.Name = "журналПодійToolStripMenuItem";
-            this.журналПодійToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.журналПодійToolStripMenuItem.Text = "Журнал подій";
+            this.test.HeaderText = "Column1";
+            this.test.Name = "test";
             // 
-            // toolStripMenuItem1
+            // DirList
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(129, 6);
+            this.DirList.HeaderText = "###";
+            this.DirList.Name = "DirList";
             // 
-            // toolStripMenuItem2
+            // Place
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(129, 6);
+            this.Place.HeaderText = "Місце призначення";
+            this.Place.Name = "Place";
             // 
-            // вихідToolStripMenuItem
+            // Mask
             // 
-            this.вихідToolStripMenuItem.Name = "вихідToolStripMenuItem";
-            this.вихідToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.вихідToolStripMenuItem.Text = "Вихід";
-            this.вихідToolStripMenuItem.Click += new System.EventHandler(this.вихідToolStripMenuItem_Click);
+            this.Mask.HeaderText = "Маска";
+            this.Mask.Name = "Mask";
+            // 
+            // Stan
+            // 
+            this.Stan.HeaderText = "Стан";
+            this.Stan.Items.AddRange(new object[] {
+            "0 - нічого не робити",
+            "1 - копіювати",
+            "2 - перемістити",
+            "3 - видалити",
+            "4 - запустити файл",
+            "5 - виконати командний рядок",
+            "6 - показати повідомлення",
+            "7 - перейменувати",
+            "8 - видалити всі крім вказаних"});
+            this.Stan.Name = "Stan";
             // 
             // MainF
             // 
@@ -315,6 +332,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mover";
             this.Load += new System.EventHandler(this.MainF_Load);
+            this.cMS1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
@@ -323,7 +341,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.GV1)).EndInit();
             this.p2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GV2)).EndInit();
-            this.cMS1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -337,11 +354,6 @@
         private System.Windows.Forms.Panel p2;
         private System.Windows.Forms.DataGridView GV2;
         private System.Windows.Forms.NumericUpDown Sec;
-        private System.Windows.Forms.DataGridViewTextBoxColumn NN;
-        private System.Windows.Forms.DataGridViewComboBoxColumn DirList;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Place;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
-        private System.Windows.Forms.DataGridViewComboBoxColumn Stan;
         private System.Windows.Forms.DataGridViewTextBoxColumn Ndir;
         private System.Windows.Forms.DataGridViewTextBoxColumn Path;
         private System.Windows.Forms.DataGridViewButtonColumn Browse;
@@ -350,11 +362,18 @@
         private System.Windows.Forms.Button bRem1;
         private System.Windows.Forms.Button bRem2;
         private System.Windows.Forms.ContextMenuStrip cMS1;
-        private System.Windows.Forms.ToolStripMenuItem налаштуванняToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SettingTSMI;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem журналПодійToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem LogTSMI;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem вихідToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem CloseTSMI;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NN;
+        private ComboBoxColumn test;
+        private System.Windows.Forms.DataGridViewComboBoxColumn DirList;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Place;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
+        private System.Windows.Forms.DataGridViewComboBoxColumn Stan;
     }
 }
 
