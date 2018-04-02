@@ -71,16 +71,18 @@ namespace Mover
 
         private void BAdd_Click(object sender, EventArgs e) //buttons "+" Click
         {
-            var daysOfWeek =
+         /*   var daysOfWeek =
                 new[] { "Monday", "Tuesday", "Wednesday",
                         "Thursday", "Friday", "Saturday",
                         "Sunday" };
-
+*/
             switch (((Button)sender).Name)
             {
                 case "bAdd1":
                     RowAdd(GV1);
-                    GV1.Columns.Add(new ComboBoxColumn(daysOfWeek));                   
+                    //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
+
+                  // MessageBox.Show( MoverWork.Mask("*<пн><ВТ><ср><чт><пт><сб><нд><18:00><14:00><TCP>").mask);
                     break;
                 case "bAdd2":
                     RowAdd(GV2);
@@ -130,9 +132,42 @@ namespace Mover
         }
 
         private void CloseTSMenu_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Ви дійсно бажаєте завершити роботу? ", "Mover", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==DialogResult.Yes)
+        {            
                 Close();
         }
+
+        private void MainF_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+                this.Hide();           
+        }
+
+        private void SettingTSMI_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+
+        private void nI1_DoubleClick(object sender, EventArgs e)
+        {
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                this.Hide();
+                this.WindowState = FormWindowState.Minimized;
+            }
+            else
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        private void MainF_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("Ви дійсно бажаєте завершити роботу? ", "Mover", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+               e.Cancel = true;
+        }
+
     }
 }

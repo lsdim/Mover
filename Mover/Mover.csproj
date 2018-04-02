@@ -49,6 +49,7 @@
     <Compile Include="MainF.Designer.cs">
       <DependentUpon>MainF.cs</DependentUpon>
     </Compile>
+    <Compile Include="MoverWork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainF.resx">
