@@ -82,7 +82,7 @@ namespace Mover
                     RowAdd(GV1);
                     //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
 
-                  // MessageBox.Show( MoverWork.Mask("*<пн><ВТ><ср><чт><пт><сб><нд><18:00><14:00><TCP>").mask);
+                   MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
                     break;
                 case "bAdd2":
                     RowAdd(GV2);
