@@ -8,6 +8,20 @@ namespace Mover
 {
     class MoverWork
     {
+        public enum Operation
+        {
+            Copy = 1,
+            CopyRepl = 11,
+            Move = 2,
+            MoveRepl = 21,
+            Delete = 3,
+            Run = 4,
+            ComandProm = 5,
+            Message = 6,
+            Rename = 7,
+            DeleteExcept = 8
+        }
+
         public struct MaskRez
         {
             public string mask;
@@ -25,6 +39,24 @@ namespace Mover
 
                 return false;
             }
+        }
+
+        private string dir_from;
+        private string dir_where;
+        private string mask;
+        private Operation oper;
+
+        public MoverWork(string _dir_from, string _dir_where, string _mask, Operation _oper)
+        {
+            dir_from = _dir_from;
+            dir_where = _dir_where;
+            mask = _mask;
+            oper = _oper;
+        }
+
+        public void Run()
+        {
+
         }
 
         public static MaskRez Mask(string text)
@@ -184,5 +216,7 @@ namespace Mover
             new_mask = mask;
             return ddt;
         }
+
+        
     }
 }
