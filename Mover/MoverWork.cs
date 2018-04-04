@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -42,23 +43,131 @@ namespace Mover
         }
 
         private string dir_from;
-        private string dir_where;
+        private string dir_destin;
         private string mask;
         private Operation oper;
 
-        public MoverWork(string _dir_from, string _dir_where, string _mask, Operation _oper)
+        public MoverWork(string _dir_from, string _dir_destin, string _mask, Operation _oper)
         {
             dir_from = _dir_from;
-            dir_where = _dir_where;
+            dir_destin = _dir_destin;
             mask = _mask;
             oper = _oper;
         }
 
+        //Main function
         public void Run()
         {
+            MaskRez elem = Mask(mask);
+            SearchOption recur = elem.Recurcia ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            string pattern = elem.clear_mask;
 
+            string[] patterns = pattern.Split(';');
+            
+
+            dir_from = Mask(dir_from).clear_mask;
+            string[] dirs_from = dir_from.Split('|');
+
+            for(int i=0; i<dirs_from.Length; i++)
+                dirs_from[i] = (dirs_from[i][dirs_from[i].Length-1] == '\\') ? dirs_from[i] : dirs_from[i] + "\\";
+
+            dir_destin = Mask(dir_destin).clear_mask;
+            dir_destin = (dir_destin[dir_destin.Length-1] == '\\') ? dir_destin : dir_destin + "\\";
+            
+
+            
+
+            IEnumerable<string> files = SafeEnumerateFiles(dirs_from, patterns, recur);
+
+            switch (oper)
+            {
+                case Operation.Copy:
+                    CopyFile(dir_destin, files, false);
+                    break;
+                case Operation.CopyRepl:
+                    CopyFile(dir_destin, files, true);
+                    break;
+            }
+
+           
+            
         }
 
+        private void CopyFile(string dectination, IEnumerable<string> fiels, bool owerwrite)
+        {
+            Directory.CreateDirectory(dectination);
+            foreach (string f in fiels)
+            {
+                File.Copy(Path.GetFileName(f), dectination, owerwrite);
+            }            
+        }
+
+        //Create List of Files (search files by pattern)
+        private static IEnumerable<string> SafeEnumerateFiles(string[] paths, string[] searchPattern, SearchOption searchOption) 
+        {
+            Stack<string> dirs = new Stack<string>();
+
+            foreach (string path in paths)
+            {
+                dirs.Push(path);
+            }
+
+            while (dirs.Count > 0)
+            {
+                string currentDirPath = dirs.Pop();
+                if (searchOption == SearchOption.AllDirectories)
+                {
+                    try
+                    {
+                        string[] subDirs = Directory.GetDirectories(currentDirPath);
+                        foreach (string subDirPath in subDirs)
+                        {
+                            dirs.Push(subDirPath);
+                        }
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        continue;
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                string[] files = null;
+                try
+                {
+                    foreach (string pattern in searchPattern)
+                    {
+                        string[] tmpfiles = null;
+                        tmpfiles = Directory.GetFiles(currentDirPath, pattern.Trim());
+                        if (tmpfiles != null)
+                        {
+                            if (files == null)
+                                files = tmpfiles;
+                            else
+                                files = files.Concat(tmpfiles).ToArray();
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    continue;
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    continue;
+                }
+
+                foreach (string filePath in files)
+                {
+                    yield return filePath;
+                }
+            }
+        }
+
+        //analisis Field Mask (replace all patterns)
         public static MaskRez Mask(string text)
         {
             MaskRez rez = new MaskRez();

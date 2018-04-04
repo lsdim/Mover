@@ -81,7 +81,8 @@ namespace Mover
                 case "bAdd1":
                     RowAdd(GV1);
                     //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
-
+                    MoverWork mw = new MoverWork("D:\\Upd_Arm\\!Send\\k8_5|D:\\Upd_Arm\\!Send\\k8_4\\", "D:\\11111\\22222\\", "*.dll", MoverWork.Operation.Copy);
+                    mw.Run();
                    MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
                     break;
                 case "bAdd2":
