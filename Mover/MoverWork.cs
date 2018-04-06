@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -72,13 +73,15 @@ namespace Mover
                 dirs_from[i] = (dirs_from[i][dirs_from[i].Length-1] == '\\') ? dirs_from[i] : dirs_from[i] + "\\";
 
             dir_destin = Mask(dir_destin).clear_mask;
-            dir_destin = (dir_destin[dir_destin.Length-1] == '\\') ? dir_destin : dir_destin + "\\";
+
+            if (oper == Operation.Copy || oper == Operation.CopyRepl || oper == Operation.Move || oper == Operation.MoveRepl)
+                dir_destin = (dir_destin[dir_destin.Length-1] == '\\') ? dir_destin : dir_destin + "\\";
             
 
             
 
             IEnumerable<string> files = SafeEnumerateFiles(dirs_from, patterns, recur);
-
+                        
             switch (oper)
             {
                 case Operation.Copy:
@@ -87,6 +90,25 @@ namespace Mover
                 case Operation.CopyRepl:
                     CopyFile(dir_destin, files, true);
                     break;
+                case Operation.Move:
+                    MoveFile(dir_destin, files, false);
+                    break;
+                case Operation.MoveRepl:
+                    MoveFile(dir_destin, files, true);
+                    break;
+                case Operation.Delete:
+                    DeleteFile(files);
+                    break;
+                case Operation.Run:
+                    RunFile(dir_destin, files);
+                    break;
+                case Operation.ComandProm:
+                    RunCMD(dir_destin, files);
+                    break;
+                case Operation.Message:
+                    Mess(dir_destin, files);
+                    break;
+
             }
 
            
@@ -95,11 +117,132 @@ namespace Mover
 
         private void CopyFile(string dectination, IEnumerable<string> fiels, bool owerwrite)
         {
-            Directory.CreateDirectory(dectination);
+            try
+            {
+
+                Directory.CreateDirectory(dectination);
+                foreach (string f in fiels)
+                {
+                    try
+                    {
+                        File.Copy(f, Path.Combine(dectination, Path.GetFileName(f)), owerwrite);
+                    }
+                    catch (Exception ex)
+                    {
+                        // error
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //error CreaTE dIRECTORY
+            }
+        }
+
+        private void MoveFile(string dectination, IEnumerable<string> fiels, bool owerwrite)
+        {
+            try
+            {
+
+                Directory.CreateDirectory(dectination);
+                foreach (string f in fiels)
+                {
+                    try
+                    {
+                        if (owerwrite)
+                            if (File.Exists(Path.Combine(dectination, Path.GetFileName(f))))
+                                File.Delete(Path.Combine(dectination, Path.GetFileName(f)));
+                        File.Move(f, Path.Combine(dectination, Path.GetFileName(f)));
+                    }
+                    
+                    catch (Exception ex)
+                    {
+                        // error
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //error CreaTE dIRECTORY
+            }
+        }
+
+        private void DeleteFile(IEnumerable<string> fiels)
+        {               
+            foreach (string f in fiels)
+             {
+                    try
+                    {                        
+                        File.Delete(f);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        // error
+                    }
+             }   
+            
+        }
+
+        private void RunFile(string resource, IEnumerable<string> fiels)
+        {
             foreach (string f in fiels)
             {
-                File.Copy(Path.GetFileName(f), dectination, owerwrite);
-            }            
+                try
+                {
+                    ProcessStartInfo startInfo = new ProcessStartInfo(resource);
+                    startInfo.WorkingDirectory = Path.GetDirectoryName(startInfo.FileName);
+                    Process.Start(startInfo);
+                    break;
+                }
+                catch(Exception ex)
+                {
+
+                }
+            }
+        }
+
+        private void RunCMD(string commands, IEnumerable<string> fiels)
+        {
+            foreach (string f in fiels)
+            {
+                try
+                {  
+                     Process process = new Process();
+                     ProcessStartInfo startInfo = new ProcessStartInfo();
+                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                     startInfo.FileName = "cmd.exe";
+                     startInfo.Arguments = "/c " + commands;
+                     process.StartInfo = startInfo;
+                     process.Start();
+                    break;
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+
+        private void Mess(string messText, IEnumerable<string> fiels)
+        {
+            foreach (string f in fiels)
+            {
+                try
+                {
+                    System.Threading.Thread mess = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(ShowMess));
+                    mess.Start(messText);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+
+        private void ShowMess(object messText)
+        {
+            System.Windows.Forms.MessageBox.Show((string)messText, "Mover", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
         }
 
         //Create List of Files (search files by pattern)

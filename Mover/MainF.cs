@@ -4,7 +4,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Mover
@@ -18,6 +21,18 @@ namespace Mover
 
         private void MainF_Load(object sender, EventArgs e)
         {
+            bool existed;
+
+            string guid = Marshal.GetTypeLibGuidForAssembly(Assembly.GetExecutingAssembly()).ToString();
+
+            Mutex mutexObj = new Mutex(true, guid, out existed);
+
+            if (!existed)
+            {
+                Application.Exit();
+                //Close();
+            }
+            
             
         }
 
@@ -81,7 +96,7 @@ namespace Mover
                 case "bAdd1":
                     RowAdd(GV1);
                     //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
-                    MoverWork mw = new MoverWork("D:\\Upd_Arm\\!Send\\k8_5|D:\\Upd_Arm\\!Send\\k8_4\\", "D:\\11111\\22222\\", "*.dll", MoverWork.Operation.Copy);
+                    MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs", MoverWork.Operation.Message);
                     mw.Run();
                    MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
                     break;
