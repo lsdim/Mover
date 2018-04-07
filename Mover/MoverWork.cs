@@ -108,6 +108,9 @@ namespace Mover
                 case Operation.Message:
                     Mess(dir_destin, files);
                     break;
+                case Operation.Rename:
+                    Rename(dir_destin, files);
+                    break;
 
             }
 
@@ -115,13 +118,13 @@ namespace Mover
             
         }
 
-        private void CopyFile(string dectination, IEnumerable<string> fiels, bool owerwrite)
+        private void CopyFile(string dectination, IEnumerable<string> files, bool owerwrite)
         {
             try
             {
 
                 Directory.CreateDirectory(dectination);
-                foreach (string f in fiels)
+                foreach (string f in files)
                 {
                     try
                     {
@@ -139,13 +142,13 @@ namespace Mover
             }
         }
 
-        private void MoveFile(string dectination, IEnumerable<string> fiels, bool owerwrite)
+        private void MoveFile(string dectination, IEnumerable<string> files, bool owerwrite)
         {
             try
             {
 
                 Directory.CreateDirectory(dectination);
-                foreach (string f in fiels)
+                foreach (string f in files)
                 {
                     try
                     {
@@ -167,9 +170,9 @@ namespace Mover
             }
         }
 
-        private void DeleteFile(IEnumerable<string> fiels)
+        private void DeleteFile(IEnumerable<string> files)
         {               
-            foreach (string f in fiels)
+            foreach (string f in files)
              {
                     try
                     {                        
@@ -184,9 +187,9 @@ namespace Mover
             
         }
 
-        private void RunFile(string resource, IEnumerable<string> fiels)
+        private void RunFile(string resource, IEnumerable<string> files)
         {
-            foreach (string f in fiels)
+            foreach (string f in files)
             {
                 try
                 {
@@ -202,9 +205,9 @@ namespace Mover
             }
         }
 
-        private void RunCMD(string commands, IEnumerable<string> fiels)
+        private void RunCMD(string commands, IEnumerable<string> files)
         {
-            foreach (string f in fiels)
+            foreach (string f in files)
             {
                 try
                 {  
@@ -224,9 +227,9 @@ namespace Mover
             }
         }
 
-        private void Mess(string messText, IEnumerable<string> fiels)
+        private void Mess(string messText, IEnumerable<string> files)
         {
-            foreach (string f in fiels)
+            foreach (string f in files)
             {
                 try
                 {
@@ -243,6 +246,39 @@ namespace Mover
         private void ShowMess(object messText)
         {
             System.Windows.Forms.MessageBox.Show((string)messText, "Mover", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+        }
+
+        private void Rename(string text, IEnumerable<string> files)
+        {
+            try
+            {
+                string[] name = text.Split('%');
+
+                foreach (string f in files)
+                {
+                    switch (name[0].Trim())
+                    {
+                        case "<*>":
+                            File.Move(f, Path.Combine(Path.GetFullPath(f), name[1].Trim()));
+                            break;
+                        case "<*.>":
+                            File.Move(f, Path.Combine(Path.GetFullPath(f), name[1].Trim()+Path.GetExtension(f)));
+                            break;
+                        case "<.*>":
+                            File.Move(f, Path.Combine(Path.GetFullPath(f),  Path.GetFileNameWithoutExtension(f)+"."+ name[1].Trim()));
+                            break;
+                        default:
+                            string new_name = Path.GetFileName(f).Replace(name[0].Trim(), name[1].Trim());
+                            File.Move(f, Path.Combine(Path.GetFullPath(f), new_name));
+                            break;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //error
+            }
         }
 
         //Create List of Files (search files by pattern)
@@ -374,31 +410,56 @@ namespace Mover
 
         private static string GetClearMask(string mask, DateTime ddt)
         {
-            if (mask.IndexOf("<") >= 0)
+            int m = mask.IndexOf("<");
+            if (m>=0)
             {
-                mask = mask.Substring(0, mask.IndexOf("<")) + GetDateMask(mask.Substring(mask.IndexOf("<") + 1, mask.IndexOf(">") - mask.IndexOf("<") - 1),ddt) + mask.Substring(mask.IndexOf(">") + 1);
-                if (mask.IndexOf("<") >= 0)
+                string tmp = mask[m + 1].ToString() + mask[m + 2];
+                if (tmp == "*>" || tmp == ".*" || tmp == "*.")
+                    m = mask.IndexOf("<", m + 1);
+            }
+               
+            if (m >= 0)
+            {
+                mask = mask.Substring(0, mask.IndexOf("<",m)) + GetDateMask(mask.Substring(mask.IndexOf("<",m) + 1, mask.IndexOf(">",m) - mask.IndexOf("<",m) - 1),ddt) + mask.Substring(mask.IndexOf(">",m) + 1);
+                if (mask.IndexOf("<",m) >= 0)
                 {
                     mask = GetClearMask(mask, ddt);
                 }
                 else
                     return mask;
-            }
-            
+            }            
             return mask;
-
         }
 
         private static string GetDateMask(string mask, DateTime ddt)
         {
-            
-            if (mask.IndexOf("+")>=0 || mask.IndexOf("-")>=0)
+            try
             {
-                ddt = NewDate(mask, ddt, out mask);
+                if (mask.IndexOf("+") >= 0 || mask.IndexOf("-") >= 0)
+                {
+                    ddt = NewDate(mask, ddt, out mask);
+                }
+
+                mask = mask.Replace('h', 'H').Replace('m', 'M').Replace('n', 'm').Replace("dddddd", "D").Replace("ddddd", "d");
+                return ddt.ToString(mask);
+            }
+            catch(Exception ex)
+            {
+                switch (mask)
+                {
+                    case "*":
+                        return "<*>";
+                    case ".*":
+                        return "<.*>";
+                    case "*.":
+                        return "<*.>";
+                    default:
+                        return mask;
+
+                }
+                
             }
 
-            mask = mask.Replace('h', 'H').Replace('m', 'M').Replace('n', 'm').Replace("dddddd", "D").Replace("ddddd", "d");
-            return ddt.ToString(mask);
         }
 
         private static DateTime NewDate(string mask, DateTime ddt, out string new_mask)
