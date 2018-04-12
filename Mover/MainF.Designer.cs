@@ -343,8 +343,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.NotifyIcon nI1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Panel p1;
         private System.Windows.Forms.DataGridView GV1;
@@ -370,6 +368,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Place;
         private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
         private System.Windows.Forms.DataGridViewComboBoxColumn Stan;
+        public System.Windows.Forms.NotifyIcon nI1;
     }
 }
 

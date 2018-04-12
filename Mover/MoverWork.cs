@@ -24,6 +24,9 @@ namespace Mover
             DeleteExcept = 8
         }
 
+        /// <summary>
+        /// Struct for mowerWork object
+        /// </summary>
         public struct MaskRez
         {
             public string mask;
@@ -43,11 +46,23 @@ namespace Mover
             }
         }
 
+        /// <summary>
+        /// Loging all events
+        /// </summary>
+        private static Log addlog = new Log();
+
         private string dir_from;
         private string dir_destin;
         private string mask;
         private Operation oper;
 
+        /// <summary>
+        /// Create new object MoverWork
+        /// </summary>
+        /// <param name="_dir_from">dir for scan (full path may bе many separated by symbol "|")</param>
+        /// <param name="_dir_destin">dir or command prom or application or message or old_string%new_string &lt;*>&lt;.*>&lt;*.> for rename </param>
+        /// <param name="_mask">mask for search (separated by symbol ";")</param>
+        /// <param name="_oper">operation from Operation typr</param>
         public MoverWork(string _dir_from, string _dir_destin, string _mask, Operation _oper)
         {
             dir_from = _dir_from;
@@ -57,8 +72,13 @@ namespace Mover
         }
 
         //Main function
+        /// <summary>
+        /// Main function that work all job
+        /// </summary>
         public void Run()
         {
+            //Example MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs;*.det ", MoverWork.Operation.DeleteExcept);
+
             MaskRez elem = Mask(mask);
             SearchOption recur = elem.Recurcia ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             string pattern = elem.clear_mask;
@@ -111,13 +131,21 @@ namespace Mover
                 case Operation.Rename:
                     Rename(dir_destin, files);
                     break;
+                case Operation.DeleteExcept:
+                    DeleteExc(files, dirs_from, recur);
+                    break;
 
             }
-
            
             
         }
 
+        /// <summary>
+        /// Coping files
+        /// </summary>
+        /// <param name="dectination">destinations path</param>
+        /// <param name="files">files list</param>
+        /// <param name="owerwrite"> owerwrite</param>
         private void CopyFile(string dectination, IEnumerable<string> files, bool owerwrite)
         {
             try
@@ -129,19 +157,26 @@ namespace Mover
                     try
                     {
                         File.Copy(f, Path.Combine(dectination, Path.GetFileName(f)), owerwrite);
+                        addlog.Info(String.Format("Скопійовано файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f))));
                     }
                     catch (Exception ex)
                     {
-                        // error
+                        addlog.Error(String.Format("При копіюванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
                     }
                 }
             }
             catch (Exception ex)
             {
-                //error CreaTE dIRECTORY
+                addlog.Error(String.Format("При копіюванні виникла помилка: \"{0}\"", ex.Message));//error CreaTE dIRECTORY
             }
         }
 
+        /// <summary>
+        /// Moving files
+        /// </summary>
+        /// <param name="dectination">dectination</param>
+        /// <param name="files">files list</param>
+        /// <param name="owerwrite">owerwrite</param>
         private void MoveFile(string dectination, IEnumerable<string> files, bool owerwrite)
         {
             try
@@ -156,20 +191,25 @@ namespace Mover
                             if (File.Exists(Path.Combine(dectination, Path.GetFileName(f))))
                                 File.Delete(Path.Combine(dectination, Path.GetFileName(f)));
                         File.Move(f, Path.Combine(dectination, Path.GetFileName(f)));
+                        addlog.Info(String.Format("Переміщено файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f))));
                     }
                     
                     catch (Exception ex)
                     {
-                        // error
+                        addlog.Error(String.Format("При переміщені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message));
                     }
                 }
             }
             catch (Exception ex)
             {
-                //error CreaTE dIRECTORY
+                addlog.Error(String.Format("При переміщені виникла помилка: \"{0}\"", ex.Message));//error CreaTE dIRECTORY
             }
         }
 
+        /// <summary>
+        /// Deleting files
+        /// </summary>
+        /// <param name="files"> files list</param>
         private void DeleteFile(IEnumerable<string> files)
         {               
             foreach (string f in files)
@@ -177,16 +217,22 @@ namespace Mover
                     try
                     {                        
                         File.Delete(f);
-                    }
+                    addlog.Info(String.Format("Видалено файл \"{0}\"", f));
+                }
 
                     catch (Exception ex)
                     {
-                        // error
+                       addlog.Error(String.Format("При видалені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message));
                     }
              }   
             
         }
 
+        /// <summary>
+        /// Run application
+        /// </summary>
+        /// <param name="resource"> application or any file that will be opened</param>
+        /// <param name="files">files list</param>
         private void RunFile(string resource, IEnumerable<string> files)
         {
             foreach (string f in files)
@@ -196,15 +242,22 @@ namespace Mover
                     ProcessStartInfo startInfo = new ProcessStartInfo(resource);
                     startInfo.WorkingDirectory = Path.GetDirectoryName(startInfo.FileName);
                     Process.Start(startInfo);
+                    addlog.Info(String.Format("Знайдено файл \"{0}\" і запущено \"{1}\"", f, resource));
                     break;
+                    
                 }
                 catch(Exception ex)
                 {
-
+                    addlog.Error(String.Format("При запуску \"{0}\" виникла помилка: \"{1}\"", resource, ex.Message));
                 }
             }
         }
 
+        /// <summary>
+        /// Run command prom
+        /// </summary>
+        /// <param name="commands">command for run</param>
+        /// <param name="files">files list</param>
         private void RunCMD(string commands, IEnumerable<string> files)
         {
             foreach (string f in files)
@@ -218,15 +271,22 @@ namespace Mover
                      startInfo.Arguments = "/c " + commands;
                      process.StartInfo = startInfo;
                      process.Start();
+
+                    addlog.Info(String.Format("Знайдено файл \"{0}\" і виконано \"{1}\"", f, commands));
                     break;
                 }
                 catch (Exception ex)
                 {
-
+                    addlog.Error(String.Format("При виконанні \"{0}\" виникла помилка: \"{1}\"", commands, ex.Message));
                 }
             }
         }
 
+        /// <summary>
+        /// Show message
+        /// </summary>
+        /// <param name="messText">Text for message</param>
+        /// <param name="files">files list</param>
         private void Mess(string messText, IEnumerable<string> files)
         {
             foreach (string f in files)
@@ -235,53 +295,131 @@ namespace Mover
                 {
                     System.Threading.Thread mess = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(ShowMess));
                     mess.Start(messText);
+                    addlog.Info(String.Format("Знайдено файл \"{0}\" і показано повідомлення \"{1}\"", f, messText));
+                    break;
                 }
                 catch (Exception ex)
                 {
-
+                    addlog.Error(String.Format("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message));
                 }
             }
         }
 
+        /// <summary>
+        /// Show message in new thread
+        /// </summary>
+        /// <param name="messText">Text for message</param>
         private void ShowMess(object messText)
-        {
-            System.Windows.Forms.MessageBox.Show((string)messText, "Mover", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
-        }
-
-        private void Rename(string text, IEnumerable<string> files)
         {
             try
             {
+                System.Windows.Forms.MessageBox.Show((string)messText, "Mover", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                addlog.Error(String.Format("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Rename files "old_chars%new_chars" (can use a mask &lt;*> or &lt;*.> or &lt;.*> as old_chars)
+        /// </summary>
+        /// <param name="text">template for rename</param>
+        /// <param name="files">files list</param>
+        private void Rename(string text, IEnumerable<string> files)
+        {
+            
                 string[] name = text.Split('%');
 
                 foreach (string f in files)
                 {
+                try
+                {
                     switch (name[0].Trim())
                     {
                         case "<*>":
-                            File.Move(f, Path.Combine(Path.GetFullPath(f), name[1].Trim()));
+                            File.Move(f, Path.Combine(Path.GetDirectoryName(f), name[1].Trim()));
+                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim()));
                             break;
                         case "<*.>":
-                            File.Move(f, Path.Combine(Path.GetFullPath(f), name[1].Trim()+Path.GetExtension(f)));
+                            File.Move(f, Path.Combine(Path.GetDirectoryName(f), name[1].Trim()+Path.GetExtension(f)));
+                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim() + Path.GetExtension(f)));
                             break;
                         case "<.*>":
-                            File.Move(f, Path.Combine(Path.GetFullPath(f),  Path.GetFileNameWithoutExtension(f)+"."+ name[1].Trim()));
+                            File.Move(f, Path.Combine(Path.GetDirectoryName(f),  Path.GetFileNameWithoutExtension(f)+"."+ name[1].Trim()));
+                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, Path.GetFileNameWithoutExtension(f) + "." + name[1].Trim()));
                             break;
                         default:
+                            string new_name1 = Path.GetDirectoryName(f);
                             string new_name = Path.GetFileName(f).Replace(name[0].Trim(), name[1].Trim());
-                            File.Move(f, Path.Combine(Path.GetFullPath(f), new_name));
+                            File.Move(f, Path.Combine(Path.GetDirectoryName(f), new_name));
+                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, new_name));
                             break;
                     }
                 }
+                catch (Exception ex)
+                {
+                    addlog.Error(String.Format("При перейменуванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
+                }
+            }
 
-            }
-            catch (Exception ex)
+            
+        }
+
+        //delete all files except
+        /// <summary>
+        /// delete all except mentioned
+        /// </summary>
+        /// <param name="files">file list</param>
+        /// <param name="dir">array of dirs for scan)</param>
+        /// <param name="recur">SearchOption</param>
+        private void DeleteExc(IEnumerable<string> files, string[] dir, SearchOption recur)
+        {
+            IEnumerable<string> all_files = SafeEnumerateFiles(dir, "*".Split(';'), recur);
+
+            List<string> files_to_del = all_files.ToList<string>();
+
+            foreach (string allf in all_files)
+            foreach (string f in files)
             {
-                //error
+                try
+                {
+                        if (f == allf)
+                        {
+                            files_to_del.Remove(f);
+                            break;
+                        }                    
+                }
+                catch (Exception ex)
+                {
+                    addlog.Error(String.Format("Виникла помилка при формуванні списку для видалення файлів: \"{0}\"", ex.Message));
+                }                   
             }
+
+            foreach (string f in files_to_del)
+            {
+                try
+                {
+                    File.Delete(f);
+                    addlog.Info(String.Format("Видалено файл \"{0}\"", f));
+                }
+
+                catch (Exception ex)
+                {
+                    addlog.Error(String.Format("При видаленні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
+                }
+            }
+
         }
 
         //Create List of Files (search files by pattern)
+        /// <summary>
+        /// Search Files by patterns
+        /// </summary>
+        /// <param name="paths">array of dirs for search</param>
+        /// <param name="searchPattern"> array of pattern for search</param>
+        /// <param name="searchOption">SearchOption (Recur or not)</param>
+        /// <returns></returns>
         private static IEnumerable<string> SafeEnumerateFiles(string[] paths, string[] searchPattern, SearchOption searchOption) 
         {
             Stack<string> dirs = new Stack<string>();
@@ -347,12 +485,17 @@ namespace Mover
         }
 
         //analisis Field Mask (replace all patterns)
+        /// <summary>
+        /// analisis Field Mask (replace all patterns)
+        /// </summary>
+        /// <param name="text">in string with patterns</param>
+        /// <returns>string with replaced patterns</returns>
         public static MaskRez Mask(string text)
         {
             MaskRez rez = new MaskRez();
             string mask = text;
 
-            Regex regex = new Regex(@".*?(<\d{2}:\d{2}>).*?");
+            Regex regex = new Regex(@".*?(<\d{2}:\d{2}>).*?"); //get time for work
             MatchCollection mc = regex.Matches(text);
             switch (mc.Count)
             {
@@ -384,7 +527,7 @@ namespace Mover
             mask = mask.Replace("<RECUR>", "");
             
 
-            bool[] day = new bool[7];
+            bool[] day = new bool[7]; //get day of week for work
 
             day[0] = (text.IndexOf("<пн>",StringComparison.InvariantCultureIgnoreCase) >= 0) ?  true : false;
             day[1] = (text.IndexOf("<вт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
@@ -408,6 +551,12 @@ namespace Mover
             return rez;
         }
 
+        /// <summary>
+        /// Get clear string without patterns
+        /// </summary>
+        /// <param name="mask">patterns</param>
+        /// <param name="ddt">DateTime for replace patterns</param>
+        /// <returns></returns>
         private static string GetClearMask(string mask, DateTime ddt)
         {
             int m = mask.IndexOf("<");
@@ -431,6 +580,12 @@ namespace Mover
             return mask;
         }
 
+        /// <summary>
+        /// Replace pattern by string 
+        /// </summary>
+        /// <param name="mask">pattern</param>
+        /// <param name="ddt">DateTime for replace</param>
+        /// <returns></returns>
         private static string GetDateMask(string mask, DateTime ddt)
         {
             try

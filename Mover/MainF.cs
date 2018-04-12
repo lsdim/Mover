@@ -14,13 +14,26 @@ namespace Mover
 {
     public partial class MainF : Form
     {
+        public const string vers = "6.0";
+        private static Log addlog = new Log();
+
         public MainF()
         {
             InitializeComponent();
         }
 
+        public NotifyIcon GetNotifyIcon()
+        {
+            return nI1;
+        }
+
+        
+
         private void MainF_Load(object sender, EventArgs e)
         {
+            addlog.Info(String.Format("**--**--**Mover v{0}**--**--**", vers));
+            addlog.Info(String.Format("***Програму запущенно***", vers));
+
             bool existed;
 
             string guid = Marshal.GetTypeLibGuidForAssembly(Assembly.GetExecutingAssembly()).ToString();
@@ -32,6 +45,8 @@ namespace Mover
                 Application.Exit();
                 //Close();
             }
+
+            nI1.Text = "Mover server v." + vers;
             
             
         }
@@ -96,7 +111,7 @@ namespace Mover
                 case "bAdd1":
                     RowAdd(GV1);
                     //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
-                    MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs", MoverWork.Operation.Rename);
+                    MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs;*.det ", MoverWork.Operation.DeleteExcept);
                     mw.Run();
                    MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
                     break;
@@ -182,7 +197,11 @@ namespace Mover
         private void MainF_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("Ви дійсно бажаєте завершити роботу? ", "Mover", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-               e.Cancel = true;
+            {
+                e.Cancel = true;
+            }
+            else
+                addlog.Info(String.Format("***Завершено роботу***", vers));
         }
 
     }
