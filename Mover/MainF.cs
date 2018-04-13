@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace Mover
 {
     public partial class MainF : Form
     {
-        public const string vers = "6.0";
+        public string vers = new Version(Application.ProductVersion).ToString();
         private static Log addlog = new Log();
 
         public MainF()
@@ -32,7 +33,8 @@ namespace Mover
         private void MainF_Load(object sender, EventArgs e)
         {
             addlog.Info(String.Format("**--**--**Mover v{0}**--**--**", vers));
-            addlog.Info(String.Format("***Програму запущенно***", vers));
+            addlog.Info(String.Format("**--**--**Mover v{0}**--**--**", UpdateApl.GetChecksumm(Application.ExecutablePath)));
+            addlog.Info(String.Format("***Програму запущенно {0}***", Application.ExecutablePath));
 
             bool existed;
 
@@ -42,9 +44,12 @@ namespace Mover
 
             if (!existed)
             {
-                Application.Exit();
-                //Close();
+                addlog.Info(String.Format("Спроба подвійного запуску", vers));
+                Process.GetCurrentProcess().Kill();               
             }
+
+            UpdateApl upd = new Mover.UpdateApl(@"http://10.202.14.15/mover/");
+            upd.Download();
 
             nI1.Text = "Mover server v." + vers;
             
