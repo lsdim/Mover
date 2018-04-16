@@ -36,12 +36,23 @@ namespace Mover
                     Process.Start(updName, new_name + " " + Path.GetFileName(nameFile));
                     Process.GetCurrentProcess().Kill();
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    addlog.Debug(ex.Message);
+                }
             }
             else
             {
                 Download();
             }
+        }
+
+        private void UPDCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!Checksumm(updName, updcSum))
+                DownloadUpd(updcSum);
+            else
+                addlog.Debug("\"{0}\" успішно завантажено", updName);           
         }
 
         public static string GetChecksumm(string filename)
@@ -76,19 +87,19 @@ namespace Mover
             {
                 if (!File.Exists(updName) || !Checksumm(updName, updcSum))
                 {
+                    addlog.Debug("Не знайдено \"{0}\", або різні контрольні суми, спроба завантажити із сервера", updName);
+
                     if (File.Exists(updName)) { File.Delete(updName); }
 
                     WebClient client = new WebClient();
-                    client.DownloadFileAsync(new Uri(url + "/" + updName), updName);
-
-                    if (!Checksumm(updName, updcSum))
-                        DownloadUpd(updcSum);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(UPDCompleted);
+                    client.DownloadFileAsync(new Uri(url + "/" + updName), updName);                    
                 }  
                 
             }
             catch (Exception ex)
             {
-                addlog.Error(String.Format("Помилка при завантаженні модуля для оновлення:{0}", ex.Message));
+                addlog.Error("Помилка при завантаженні модуля для оновлення: {0}", ex.Message);
             }
 
         }
@@ -120,11 +131,12 @@ namespace Mover
                 Version localVersion = new Version(Application.ProductVersion);
 
                 cSum = doc.GetElementsByTagName("controlSum")[0].InnerText;
-                updcSum = doc.GetElementsByTagName("UPDcontrolSum")[0].InnerText;                
+                updcSum = doc.GetElementsByTagName("UPDcontrolSum")[0].InnerText;
 
 
                 if (localVersion < remoteVersion)
                 {
+                    addlog.Info("Знайдено нову версію Mover - \"{0}\"", remoteVersion.ToString());
                     DownloadUpd(updcSum);
 
                     if (File.Exists(new_name)) { File.Delete(new_name); }
@@ -134,10 +146,12 @@ namespace Mover
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
                     client.DownloadFileAsync(new Uri(url + "/mover.exe"), new_name);
                 }
+                else
+                    addlog.Info("Версія програми актуальна");
             }
             catch (Exception ex)
             {
-                addlog.Error(String.Format("Помилка при завантаженні оновлення:{0}", ex.Message));
+                addlog.Error("Помилка при завантаженні оновлення: {0}", ex.Message);
             }
         }
     }

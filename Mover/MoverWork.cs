@@ -65,10 +65,17 @@ namespace Mover
         /// <param name="_oper">operation from Operation typr</param>
         public MoverWork(string _dir_from, string _dir_destin, string _mask, Operation _oper)
         {
-            dir_from = _dir_from;
-            dir_destin = _dir_destin;
-            mask = _mask;
-            oper = _oper;
+            try
+            {
+                dir_from = _dir_from;
+                dir_destin = _dir_destin;
+                mask = _mask;
+                oper = _oper;
+            }
+            catch (Exception ex)
+            {
+                addlog.Debug(ex.Message);
+            }
         }
 
         //Main function
@@ -134,10 +141,7 @@ namespace Mover
                 case Operation.DeleteExcept:
                     DeleteExc(files, dirs_from, recur);
                     break;
-
-            }
-           
-            
+            }     
         }
 
         /// <summary>
@@ -150,24 +154,23 @@ namespace Mover
         {
             try
             {
-
                 Directory.CreateDirectory(dectination);
                 foreach (string f in files)
                 {
                     try
                     {
                         File.Copy(f, Path.Combine(dectination, Path.GetFileName(f)), owerwrite);
-                        addlog.Info(String.Format("Скопійовано файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f))));
+                        addlog.Info("Скопійовано файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f)));
                     }
                     catch (Exception ex)
                     {
-                        addlog.Error(String.Format("При копіюванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
+                        addlog.Error("При копіюванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message);
                     }
                 }
             }
             catch (Exception ex)
             {
-                addlog.Error(String.Format("При копіюванні виникла помилка: \"{0}\"", ex.Message));//error CreaTE dIRECTORY
+                addlog.Error("При копіюванні виникла помилка: \"{0}\"", ex.Message);//error CreaTE dIRECTORY
             }
         }
 
@@ -191,18 +194,18 @@ namespace Mover
                             if (File.Exists(Path.Combine(dectination, Path.GetFileName(f))))
                                 File.Delete(Path.Combine(dectination, Path.GetFileName(f)));
                         File.Move(f, Path.Combine(dectination, Path.GetFileName(f)));
-                        addlog.Info(String.Format("Переміщено файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f))));
+                        addlog.Info("Переміщено файл \"{0}\" до \"{1}\"", f, Path.Combine(dectination, Path.GetFileName(f)));
                     }
                     
                     catch (Exception ex)
                     {
-                        addlog.Error(String.Format("При переміщені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message));
+                        addlog.Error("При переміщені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message);
                     }
                 }
             }
             catch (Exception ex)
             {
-                addlog.Error(String.Format("При переміщені виникла помилка: \"{0}\"", ex.Message));//error CreaTE dIRECTORY
+                addlog.Error("При переміщені виникла помилка: \"{0}\"", ex.Message);//error CreaTE dIRECTORY
             }
         }
 
@@ -217,12 +220,12 @@ namespace Mover
                     try
                     {                        
                         File.Delete(f);
-                    addlog.Info(String.Format("Видалено файл \"{0}\"", f));
+                    addlog.Info("Видалено файл \"{0}\"", f);
                 }
 
                     catch (Exception ex)
                     {
-                       addlog.Error(String.Format("При видалені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message));
+                       addlog.Error("При видалені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message);
                     }
              }   
             
@@ -242,13 +245,13 @@ namespace Mover
                     ProcessStartInfo startInfo = new ProcessStartInfo(resource);
                     startInfo.WorkingDirectory = Path.GetDirectoryName(startInfo.FileName);
                     Process.Start(startInfo);
-                    addlog.Info(String.Format("Знайдено файл \"{0}\" і запущено \"{1}\"", f, resource));
+                    addlog.Info("Знайдено файл \"{0}\" і запущено \"{1}\"", f, resource);
                     break;
                     
                 }
                 catch(Exception ex)
                 {
-                    addlog.Error(String.Format("При запуску \"{0}\" виникла помилка: \"{1}\"", resource, ex.Message));
+                    addlog.Error("При запуску \"{0}\" виникла помилка: \"{1}\"", resource, ex.Message);
                 }
             }
         }
@@ -272,12 +275,12 @@ namespace Mover
                      process.StartInfo = startInfo;
                      process.Start();
 
-                    addlog.Info(String.Format("Знайдено файл \"{0}\" і виконано \"{1}\"", f, commands));
+                    addlog.Info("Знайдено файл \"{0}\" і виконано \"{1}\"", f, commands);
                     break;
                 }
                 catch (Exception ex)
                 {
-                    addlog.Error(String.Format("При виконанні \"{0}\" виникла помилка: \"{1}\"", commands, ex.Message));
+                    addlog.Error("При виконанні \"{0}\" виникла помилка: \"{1}\"", commands, ex.Message);
                 }
             }
         }
@@ -295,12 +298,12 @@ namespace Mover
                 {
                     System.Threading.Thread mess = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(ShowMess));
                     mess.Start(messText);
-                    addlog.Info(String.Format("Знайдено файл \"{0}\" і показано повідомлення \"{1}\"", f, messText));
+                    addlog.Info("Знайдено файл \"{0}\" і показано повідомлення \"{1}\"", f, messText);
                     break;
                 }
                 catch (Exception ex)
                 {
-                    addlog.Error(String.Format("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message));
+                    addlog.Error("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message);
                 }
             }
         }
@@ -317,7 +320,7 @@ namespace Mover
             }
             catch (Exception ex)
             {
-                addlog.Error(String.Format("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message));
+                addlog.Error("При відображенні повідомлення \"{0}\" виникла помилка: \"{1}\"", messText, ex.Message);
             }
         }
 
@@ -339,27 +342,27 @@ namespace Mover
                     {
                         case "<*>":
                             File.Move(f, Path.Combine(Path.GetDirectoryName(f), name[1].Trim()));
-                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim()));
+                            addlog.Info("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim());
                             break;
                         case "<*.>":
                             File.Move(f, Path.Combine(Path.GetDirectoryName(f), name[1].Trim()+Path.GetExtension(f)));
-                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim() + Path.GetExtension(f)));
+                            addlog.Info("Перейменованно файл \"{0}\" на \"{1}\"", f, name[1].Trim() + Path.GetExtension(f));
                             break;
                         case "<.*>":
                             File.Move(f, Path.Combine(Path.GetDirectoryName(f),  Path.GetFileNameWithoutExtension(f)+"."+ name[1].Trim()));
-                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, Path.GetFileNameWithoutExtension(f) + "." + name[1].Trim()));
+                            addlog.Info("Перейменованно файл \"{0}\" на \"{1}\"", f, Path.GetFileNameWithoutExtension(f) + "." + name[1].Trim());
                             break;
                         default:
                             string new_name1 = Path.GetDirectoryName(f);
                             string new_name = Path.GetFileName(f).Replace(name[0].Trim(), name[1].Trim());
                             File.Move(f, Path.Combine(Path.GetDirectoryName(f), new_name));
-                            addlog.Info(String.Format("Перейменованно файл \"{0}\" на \"{1}\"", f, new_name));
+                            addlog.Info("Перейменованно файл \"{0}\" на \"{1}\"", f, new_name);
                             break;
                     }
                 }
                 catch (Exception ex)
                 {
-                    addlog.Error(String.Format("При перейменуванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
+                    addlog.Error("При перейменуванні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message);
                 }
             }
 
@@ -392,7 +395,7 @@ namespace Mover
                 }
                 catch (Exception ex)
                 {
-                    addlog.Error(String.Format("Виникла помилка при формуванні списку для видалення файлів: \"{0}\"", ex.Message));
+                    addlog.Error("Виникла помилка при формуванні списку для видалення файлів: \"{0}\"", ex.Message);
                 }                   
             }
 
@@ -401,12 +404,12 @@ namespace Mover
                 try
                 {
                     File.Delete(f);
-                    addlog.Info(String.Format("Видалено файл \"{0}\"", f));
+                    addlog.Info("Видалено файл \"{0}\"", f);
                 }
 
                 catch (Exception ex)
                 {
-                    addlog.Error(String.Format("При видаленні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message));
+                    addlog.Error("При видаленні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message);
                 }
             }
 
@@ -421,7 +424,7 @@ namespace Mover
         /// <param name="searchOption">SearchOption (Recur or not)</param>
         /// <returns></returns>
         private static IEnumerable<string> SafeEnumerateFiles(string[] paths, string[] searchPattern, SearchOption searchOption) 
-        {
+        {             
             Stack<string> dirs = new Stack<string>();
 
             foreach (string path in paths)
@@ -482,6 +485,7 @@ namespace Mover
                     yield return filePath;
                 }
             }
+            
         }
 
         //analisis Field Mask (replace all patterns)
@@ -492,63 +496,72 @@ namespace Mover
         /// <returns>string with replaced patterns</returns>
         public static MaskRez Mask(string text)
         {
-            MaskRez rez = new MaskRez();
-            string mask = text;
-
-            Regex regex = new Regex(@".*?(<\d{2}:\d{2}>).*?"); //get time for work
-            MatchCollection mc = regex.Matches(text);
-            switch (mc.Count)
+            
+                MaskRez rez = new MaskRez();
+            try
             {
-                case 0:
-                    break;
-                case 1:
-                    TimeSpan.TryParse(mc[0].Groups[1].Value.Replace("<", "").Replace(">","").Trim(), out rez.ttm1);
-                    mask = mask.Replace(mc[0].Groups[1].Value, "");
-                    break;
-                default: //case 2:
-                    TimeSpan.TryParse(mc[0].Groups[1].Value.Replace("<", "").Replace(">", "").Trim(), out TimeSpan start);
-                    TimeSpan.TryParse(mc[1].Groups[1].Value.Replace("<", "").Replace(">", "").Trim(), out TimeSpan end);
-                    if (start > end)
-                    {
-                        end = start;
-                        start = TimeSpan.Parse(mc[1].Groups[1].Value.Replace("<", "").Replace(">", "").Trim());
-                    }
-                    rez.ttm1 = start;
-                    rez.ttm2 = end;
-                    foreach(Match m in mc)
-                        mask = mask.Replace(m.Groups[1].Value, "");
-                    break;
-            }
+                string mask = text;
 
-            rez.TCP = (text.IndexOf("<TCP>") >= 0) ? true : false;
-            mask = mask.Replace("<TCP>", "");
+                Regex regex = new Regex(@".*?(<\d{2}:\d{2}>).*?"); //get time for work
+                MatchCollection mc = regex.Matches(text);
+                switch (mc.Count)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        TimeSpan.TryParse(mc[0].Groups[1].Value.Replace("<", "").Replace(">", "").Trim(), out rez.ttm1);
+                        mask = mask.Replace(mc[0].Groups[1].Value, "");
+                        break;
+                    default: //case 2:
+                        TimeSpan.TryParse(mc[0].Groups[1].Value.Replace("<", "").Replace(">", "").Trim(), out TimeSpan start);
+                        TimeSpan.TryParse(mc[1].Groups[1].Value.Replace("<", "").Replace(">", "").Trim(), out TimeSpan end);
+                        if (start > end)
+                        {
+                            end = start;
+                            start = TimeSpan.Parse(mc[1].Groups[1].Value.Replace("<", "").Replace(">", "").Trim());
+                        }
+                        rez.ttm1 = start;
+                        rez.ttm2 = end;
+                        foreach (Match m in mc)
+                            mask = mask.Replace(m.Groups[1].Value, "");
+                        break;
+                }
 
-            rez.Recurcia = (text.IndexOf("<RECUR>") >= 0) ? true : false;
-            mask = mask.Replace("<RECUR>", "");
-            
+                rez.TCP = (text.IndexOf("<TCP>") >= 0) ? true : false;
+                mask = mask.Replace("<TCP>", "");
 
-            bool[] day = new bool[7]; //get day of week for work
+                rez.Recurcia = (text.IndexOf("<RECUR>") >= 0) ? true : false;
+                mask = mask.Replace("<RECUR>", "");
 
-            day[0] = (text.IndexOf("<пн>",StringComparison.InvariantCultureIgnoreCase) >= 0) ?  true : false;
-            day[1] = (text.IndexOf("<вт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-            day[2] = (text.IndexOf("<ср>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-            day[3] = (text.IndexOf("<чт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-            day[4] = (text.IndexOf("<пт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-            day[5] = (text.IndexOf("<сб>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-            day[6] = (text.IndexOf("<нд>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
 
-            rez.days = day;
+                bool[] day = new bool[7]; //get day of week for work
 
-            mask = mask.ToUpper().Replace("<пн>".ToUpper(), "").Replace("<вт>".ToUpper(), "")
-                .Replace("<ср>".ToUpper(), "").Replace("<чт>".ToUpper(), "").Replace("<пт>".ToUpper(), "")
-                .Replace("<сб>".ToUpper(), "").Replace("<нд>".ToUpper(), "").ToLower();
-            
-            rez.mask = mask;
-            rez.clear_mask = GetClearMask(mask, DateTime.Now);
+                day[0] = (text.IndexOf("<пн>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[1] = (text.IndexOf("<вт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[2] = (text.IndexOf("<ср>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[3] = (text.IndexOf("<чт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[4] = (text.IndexOf("<пт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[5] = (text.IndexOf("<сб>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[6] = (text.IndexOf("<нд>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+
+                rez.days = day;
+
+                mask = mask.ToUpper().Replace("<пн>".ToUpper(), "").Replace("<вт>".ToUpper(), "")
+                    .Replace("<ср>".ToUpper(), "").Replace("<чт>".ToUpper(), "").Replace("<пт>".ToUpper(), "")
+                    .Replace("<сб>".ToUpper(), "").Replace("<нд>".ToUpper(), "").ToLower();
+
+                rez.mask = mask;
+                rez.clear_mask = GetClearMask(mask, DateTime.Now);
                 //DateTime ddt = DateTime.Now;
-            
 
-            return rez;
+
+                return rez;
+            }
+            catch (Exception ex)
+            {
+                addlog.Debug("при розборі маски {0} виникла помилка: {1}",text,ex.Message);
+                return rez;
+            }
         }
 
         /// <summary>
@@ -559,33 +572,41 @@ namespace Mover
         /// <returns></returns>
         private static string GetClearMask(string mask, DateTime ddt)
         {
-            int m = mask.IndexOf("<");
-            if (m>=0)
+            try
             {
-                string tmp = mask[m + 1].ToString() + mask[m + 2];
-                if (tmp == "*>" || tmp == ".*" || tmp == "*.")
-                    m = mask.IndexOf("<", m + 1);
-            }
-               
-            if (m >= 0)
-            {
-                mask = mask.Substring(0, mask.IndexOf("<",m)) + GetDateMask(mask.Substring(mask.IndexOf("<",m) + 1, mask.IndexOf(">",m) - mask.IndexOf("<",m) - 1),ddt) + mask.Substring(mask.IndexOf(">",m) + 1);
-                if (mask.IndexOf("<",m) >= 0)
+                int m = mask.IndexOf("<");
+                if (m >= 0)
                 {
-                    mask = GetClearMask(mask, ddt);
+                    string tmp = mask[m + 1].ToString() + mask[m + 2];
+                    if (tmp == "*>" || tmp == ".*" || tmp == "*.")
+                        m = mask.IndexOf("<", m + 1);
                 }
-                else
-                    return mask;
-            }            
-            return mask;
+
+                if (m >= 0)
+                {
+                    mask = mask.Substring(0, mask.IndexOf("<", m)) + GetDateMask(mask.Substring(mask.IndexOf("<", m) + 1, mask.IndexOf(">", m) - mask.IndexOf("<", m) - 1), ddt) + mask.Substring(mask.IndexOf(">", m) + 1);
+                    if (mask.IndexOf("<", m) >= 0)
+                    {
+                        mask = GetClearMask(mask, ddt);
+                    }
+                    else
+                        return mask;
+                }
+                return mask;
+            }
+            catch (Exception ex)
+            {
+                addlog.Debug("при отриманні чистої маски {0} виникла помилка: {1}", mask, ex.Message);
+                return "";
+            }
         }
 
-        /// <summary>
-        /// Replace pattern by string 
-        /// </summary>
-        /// <param name="mask">pattern</param>
-        /// <param name="ddt">DateTime for replace</param>
-        /// <returns></returns>
+            /// <summary>
+            /// Replace pattern by string 
+            /// </summary>
+            /// <param name="mask">pattern</param>
+            /// <param name="ddt">DateTime for replace</param>
+            /// <returns></returns>
         private static string GetDateMask(string mask, DateTime ddt)
         {
             try
@@ -610,81 +631,86 @@ namespace Mover
                         return "<*.>";
                     default:
                         return mask;
-
-                }
-                
+                }                
             }
-
         }
 
         private static DateTime NewDate(string mask, DateTime ddt, out string new_mask)
         {
-            int d=0;
-            int j = 0;
-            string znak = "+";
-            while (j<mask.Length)
+            try
             {
-                if (mask[j]=='+')
+                int d = 0;
+                int j = 0;
+                string znak = "+";
+                while (j < mask.Length)
                 {
-                    znak = "+";
-                    break;                    
+                    if (mask[j] == '+')
+                    {
+                        znak = "+";
+                        break;
+                    }
+                    if (mask[j] == '-')
+                    {
+                        znak = "-";
+                        break;
+                    }
+                    j++;
                 }
-                if (mask[j] == '-')
-                {
-                    znak = "-";
-                    break;
-                }
-                j++;
+
+                if (mask.IndexOf(znak) >= 0)
+                    if (char.IsDigit(mask[mask.IndexOf(znak) + 1]))
+                    {
+                        char oper = mask[mask.IndexOf(znak) - 1];
+                        int i = mask.IndexOf(znak) + 1;
+                        string tmp = znak;
+                        while (char.IsDigit(mask, i))
+                        {
+                            tmp += mask[i];
+                            i++;
+                            if (i == mask.Length) break;
+                        }
+                        mask = mask.Substring(0, mask.IndexOf(znak)) + mask.Substring(i);
+                        d = Int32.Parse(tmp);
+
+                        switch (oper)
+                        {
+                            case 'd':
+                                ddt = ddt.AddDays(d);
+                                break;
+                            case 'm':
+                                ddt = ddt.AddMonths(d);
+                                break;
+                            case 'y':
+                                ddt = ddt.AddYears(d);
+                                break;
+                            case 'h':
+                                ddt = ddt.AddHours(d);
+                                break;
+                            case 'n':
+                                ddt = ddt.AddMinutes(d);
+                                break;
+                            case 's':
+                                ddt = ddt.AddSeconds(d);
+                                break;
+                        }
+
+                        if (mask.IndexOf("+") >= 0 || mask.IndexOf("-") >= 0)
+                        {
+                            ddt = NewDate(mask, ddt, out mask);
+                        }
+
+
+                    }
+                new_mask = mask;
+                return ddt;
             }
-            
-            if (mask.IndexOf(znak) >= 0)
-            if (char.IsDigit(mask[mask.IndexOf(znak)+1]))
+            catch (Exception ex)
             {
-                char oper = mask[mask.IndexOf(znak) - 1]; 
-                int i = mask.IndexOf(znak) +1;
-                string tmp = znak;
-                while(char.IsDigit(mask,i))
-                {
-                    tmp += mask[i];
-                    i++;
-                    if (i == mask.Length) break;
-                }
-                mask = mask.Substring(0, mask.IndexOf(znak)) + mask.Substring(i);
-                d = Int32.Parse(tmp);
-
-                switch (oper)
-                {
-                    case 'd':
-                        ddt = ddt.AddDays(d);
-                        break;
-                    case 'm':
-                        ddt = ddt.AddMonths(d);
-                        break;
-                    case 'y':
-                        ddt = ddt.AddYears(d);
-                        break;
-                    case 'h':
-                        ddt = ddt.AddHours(d);
-                        break;
-                    case 'n':
-                        ddt = ddt.AddMinutes(d);
-                        break;
-                    case 's':
-                        ddt = ddt.AddSeconds(d);
-                        break;  
-                }
-
-                if (mask.IndexOf("+") >= 0 || mask.IndexOf("-") >= 0)
-                {
-                   ddt = NewDate(mask, ddt, out mask);
-                }
-
-
+                addlog.Debug("При отриманні маски {0} з дати {1} виникла помилка: {2}", mask, ddt.ToString(), ex.Message);
+                new_mask = "";
+                return ddt;                
             }
-            new_mask = mask;
-            return ddt;
         }
-
         
     }
 }

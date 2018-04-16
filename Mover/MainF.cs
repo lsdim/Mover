@@ -32,11 +32,13 @@ namespace Mover
 
         private void MainF_Load(object sender, EventArgs e)
         {
-            addlog.Info(String.Format("**--**--**Mover v{0}**--**--**", vers));
-            addlog.Info(String.Format("**--**--**Mover v{0}**--**--**", UpdateApl.GetChecksumm(Application.ExecutablePath)));
-            addlog.Info(String.Format("***Програму запущенно {0}***", Application.ExecutablePath));
+            addlog.Info("**--**--**Mover v{0}**--**--**", vers);
+            addlog.Info("**--**--**Mover v{0}**--**--**", UpdateApl.GetChecksumm(Application.ExecutablePath));
+            addlog.Info("***Програму запущенно {0}***", Application.ExecutablePath);
 
             bool existed;
+
+            MoverWeb.MoverServ ms = new MoverWeb.MoverServ();
 
             string guid = Marshal.GetTypeLibGuidForAssembly(Assembly.GetExecutingAssembly()).ToString();
 
@@ -52,8 +54,23 @@ namespace Mover
             upd.Download();
 
             nI1.Text = "Mover server v." + vers;
+
+            ReadIni();
             
-            
+        }
+
+        private void ReadIni()
+        {
+            IniFiles ini = new IniFiles("D:\\Prog\\19\\Mover_v6(C#)\\Mover\\Mover\\bin\\Debug\\Properties.ini");
+            int countDir = ini.ReadInteger("MOOOVER", "CountDir", 0);
+            GV2.RowCount = countDir;
+
+            for (int i=0; i<countDir; i++)
+            {
+                GV2[0, i].Value = i + 1;
+                GV2[1, i].Value = ini.ReadString("DIR", "dir." + (i+1).ToString(), "");
+                GV2[2, i].Value = "...";
+            }
         }
 
         private void GV2_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -116,9 +133,9 @@ namespace Mover
                 case "bAdd1":
                     RowAdd(GV1);
                     //  GV1.Columns.Add(new ComboBoxColumn(daysOfWeek)); 
-                    MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs;*.det ", MoverWork.Operation.DeleteExcept);
-                    mw.Run();
-                   MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
+                    //MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs;*.det ", MoverWork.Operation.DeleteExcept);
+                    //mw.Run();
+                   //MessageBox.Show( MoverWork.Mask("\\\\10.202.14.155\\D:\\fpensia\\<yyyy.mm>").clear_mask);
                     break;
                 case "bAdd2":
                     RowAdd(GV2);
@@ -128,14 +145,28 @@ namespace Mover
 
         private void RowAdd(DataGridView GV)
         {
-            GV.Rows.Add();
-            GV[0, GV.Rows.Count - 1].Value = GV.Rows.Count;
-            GV.CurrentCell = GV.Rows[GV.Rows.Count - 1].Cells[0];
+            try
+            {
+                GV.Rows.Add();
+                GV[0, GV.Rows.Count - 1].Value = GV.Rows.Count;
+                GV.CurrentCell = GV.Rows[GV.Rows.Count - 1].Cells[0];
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void GV2_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            Gv2IsUnic((String)GV2[e.ColumnIndex, e.RowIndex].Value, e.RowIndex);
+            try
+            {
+                Gv2IsUnic((String)GV2[e.ColumnIndex, e.RowIndex].Value, e.RowIndex);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BRem_Click(object sender, EventArgs e)
@@ -153,17 +184,24 @@ namespace Mover
 
         private void RowRem(DataGridView GV)
         {
-            if (GV.Rows.Count <= 0)
-                return;
-
-            GV.Rows.Remove(GV.Rows[GV.CurrentCell.RowIndex]);
-
-            if (GV.Rows.Count <= 0)
-                return;
-
-            for (int i = GV.CurrentCell.RowIndex; i < GV.Rows.Count; i++)
+            try
             {
-                GV[0, i].Value = i + 1;
+                if (GV.Rows.Count <= 0)
+                    return;
+
+                GV.Rows.Remove(GV.Rows[GV.CurrentCell.RowIndex]);
+
+                if (GV.Rows.Count <= 0)
+                    return;
+
+                for (int i = GV.CurrentCell.RowIndex; i < GV.Rows.Count; i++)
+                {
+                    GV[0, i].Value = i + 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -206,7 +244,7 @@ namespace Mover
                 e.Cancel = true;
             }
             else
-                addlog.Info(String.Format("***Завершено роботу***", vers));
+                addlog.Info("***Завершено роботу***", vers);
         }
 
     }

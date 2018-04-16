@@ -43,11 +43,6 @@
             this.Sec = new System.Windows.Forms.NumericUpDown();
             this.p1 = new System.Windows.Forms.Panel();
             this.GV1 = new System.Windows.Forms.DataGridView();
-            this.NN = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DirList = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Stan = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.bRem2 = new System.Windows.Forms.Button();
             this.bAdd2 = new System.Windows.Forms.Button();
@@ -56,6 +51,11 @@
             this.Ndir = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Path = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.NN = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DirList = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Stan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -195,48 +195,13 @@
             this.Stan});
             this.GV1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GV1.Location = new System.Drawing.Point(0, 0);
+            this.GV1.MultiSelect = false;
             this.GV1.Name = "GV1";
+            this.GV1.RowHeadersVisible = false;
+            this.GV1.RowHeadersWidth = 10;
+            this.GV1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GV1.Size = new System.Drawing.Size(494, 181);
             this.GV1.TabIndex = 0;
-            // 
-            // NN
-            // 
-            this.NN.Frozen = true;
-            this.NN.HeaderText = "№";
-            this.NN.Name = "NN";
-            this.NN.ReadOnly = true;
-            this.NN.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.NN.Width = 30;
-            // 
-            // DirList
-            // 
-            this.DirList.HeaderText = "###";
-            this.DirList.Name = "DirList";
-            // 
-            // Place
-            // 
-            this.Place.HeaderText = "Місце призначення";
-            this.Place.Name = "Place";
-            // 
-            // Mask
-            // 
-            this.Mask.HeaderText = "Маска";
-            this.Mask.Name = "Mask";
-            // 
-            // Stan
-            // 
-            this.Stan.HeaderText = "Стан";
-            this.Stan.Items.AddRange(new object[] {
-            "0 - нічого не робити",
-            "1 - копіювати",
-            "2 - перемістити",
-            "3 - видалити",
-            "4 - запустити файл",
-            "5 - виконати командний рядок",
-            "6 - показати повідомлення",
-            "7 - перейменувати",
-            "8 - видалити всі крім вказаних"});
-            this.Stan.Name = "Stan";
             // 
             // comboBox1
             // 
@@ -289,7 +254,11 @@
             this.Browse});
             this.GV2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GV2.Location = new System.Drawing.Point(0, 0);
+            this.GV2.MultiSelect = false;
             this.GV2.Name = "GV2";
+            this.GV2.RowHeadersVisible = false;
+            this.GV2.RowHeadersWidth = 20;
+            this.GV2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GV2.Size = new System.Drawing.Size(494, 133);
             this.GV2.TabIndex = 0;
             this.GV2.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GV2_CellClick);
@@ -301,13 +270,15 @@
             this.Ndir.HeaderText = "№";
             this.Ndir.Name = "Ndir";
             this.Ndir.ReadOnly = true;
+            this.Ndir.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Ndir.Width = 30;
             // 
             // Path
             // 
             this.Path.HeaderText = "Перевіряти папки";
             this.Path.Name = "Path";
-            this.Path.Width = 300;
+            this.Path.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Path.Width = 350;
             // 
             // Browse
             // 
@@ -315,6 +286,40 @@
             this.Browse.Name = "Browse";
             this.Browse.Text = "...";
             this.Browse.ToolTipText = "Обрати папку";
+            this.Browse.Width = 50;
+            // 
+            // NN
+            // 
+            this.NN.Frozen = true;
+            this.NN.HeaderText = "№";
+            this.NN.Name = "NN";
+            this.NN.ReadOnly = true;
+            this.NN.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.NN.Width = 30;
+            // 
+            // DirList
+            // 
+            this.DirList.HeaderText = "###";
+            this.DirList.Name = "DirList";
+            this.DirList.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.DirList.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Place
+            // 
+            this.Place.HeaderText = "Місце призначення";
+            this.Place.Name = "Place";
+            // 
+            // Mask
+            // 
+            this.Mask.HeaderText = "Маска";
+            this.Mask.Name = "Mask";
+            // 
+            // Stan
+            // 
+            this.Stan.HeaderText = "Стан";
+            this.Stan.Name = "Stan";
+            this.Stan.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Stan.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // MainF
             // 
@@ -349,9 +354,6 @@
         private System.Windows.Forms.Panel p2;
         private System.Windows.Forms.DataGridView GV2;
         private System.Windows.Forms.NumericUpDown Sec;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Ndir;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Path;
-        private System.Windows.Forms.DataGridViewButtonColumn Browse;
         private System.Windows.Forms.Button bAdd2;
         private System.Windows.Forms.Button bAdd1;
         private System.Windows.Forms.Button bRem1;
@@ -363,12 +365,15 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem CloseTSMI;
         private System.Windows.Forms.ComboBox comboBox1;
+        public System.Windows.Forms.NotifyIcon nI1;
         private System.Windows.Forms.DataGridViewTextBoxColumn NN;
-        private System.Windows.Forms.DataGridViewComboBoxColumn DirList;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DirList;
         private System.Windows.Forms.DataGridViewTextBoxColumn Place;
         private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
-        private System.Windows.Forms.DataGridViewComboBoxColumn Stan;
-        public System.Windows.Forms.NotifyIcon nI1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Stan;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Ndir;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Path;
+        private System.Windows.Forms.DataGridViewButtonColumn Browse;
     }
 }
 
