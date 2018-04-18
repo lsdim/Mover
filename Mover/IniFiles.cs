@@ -59,6 +59,22 @@ namespace Mover
                 return defaultVal;  
         }
 
+        public bool ReadBool(string aSection, string aKey, bool defaultVal)
+        {
+            //Для получения значения
+            StringBuilder buffer = new StringBuilder(SIZE);
+
+            //Получить значение в buffer
+            GetPrivateString(aSection, aKey, null, buffer, SIZE, path);
+
+            //Вернуть полученное значение
+
+            if (int.TryParse(buffer.ToString(), out int rez))
+                return Convert.ToBoolean(rez);
+            else
+                return defaultVal;
+        }
+
 
         //Пишет значение в INI-файл (по указанным секции и ключу) 
         /// <summary>
@@ -72,6 +88,7 @@ namespace Mover
             //Записать значение в INI-файл
             WritePrivateString(aSection, aKey, aValue, path);
         }
+
 
         //Возвращает или устанавливает путь к INI файлу
         public string Path { get { return path; } }

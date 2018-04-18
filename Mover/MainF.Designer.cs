@@ -30,6 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainF));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.nI1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.cMS1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.SettingTSMI = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,24 +40,27 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.CloseTSMI = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.chBbaloon = new System.Windows.Forms.CheckBox();
             this.bRem1 = new System.Windows.Forms.Button();
             this.bAdd1 = new System.Windows.Forms.Button();
             this.Sec = new System.Windows.Forms.NumericUpDown();
             this.p1 = new System.Windows.Forms.Panel();
             this.GV1 = new System.Windows.Forms.DataGridView();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.bRem2 = new System.Windows.Forms.Button();
-            this.bAdd2 = new System.Windows.Forms.Button();
-            this.p2 = new System.Windows.Forms.Panel();
-            this.GV2 = new System.Windows.Forms.DataGridView();
-            this.Ndir = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Path = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.NN = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirList = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Stan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.bCancel = new System.Windows.Forms.Button();
+            this.bOK = new System.Windows.Forms.Button();
+            this.bRem2 = new System.Windows.Forms.Button();
+            this.bAdd2 = new System.Windows.Forms.Button();
+            this.p2 = new System.Windows.Forms.Panel();
+            this.GV2 = new System.Windows.Forms.DataGridView();
+            this.PathScan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.chBconf = new System.Windows.Forms.CheckBox();
+            this.cBconf = new System.Windows.Forms.ComboBox();
+            this.chBAutoRun = new System.Windows.Forms.CheckBox();
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -127,6 +132,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.chBbaloon);
             this.splitContainer1.Panel1.Controls.Add(this.bRem1);
             this.splitContainer1.Panel1.Controls.Add(this.bAdd1);
             this.splitContainer1.Panel1.Controls.Add(this.Sec);
@@ -134,18 +140,34 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.comboBox1);
+            this.splitContainer1.Panel2.Controls.Add(this.chBAutoRun);
+            this.splitContainer1.Panel2.Controls.Add(this.cBconf);
+            this.splitContainer1.Panel2.Controls.Add(this.chBconf);
+            this.splitContainer1.Panel2.Controls.Add(this.bCancel);
+            this.splitContainer1.Panel2.Controls.Add(this.bOK);
             this.splitContainer1.Panel2.Controls.Add(this.bRem2);
             this.splitContainer1.Panel2.Controls.Add(this.bAdd2);
             this.splitContainer1.Panel2.Controls.Add(this.p2);
-            this.splitContainer1.Size = new System.Drawing.Size(500, 410);
-            this.splitContainer1.SplitterDistance = 221;
+            this.splitContainer1.Size = new System.Drawing.Size(500, 391);
+            this.splitContainer1.SplitterDistance = 210;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // chBbaloon
+            // 
+            this.chBbaloon.AutoSize = true;
+            this.chBbaloon.Checked = true;
+            this.chBbaloon.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chBbaloon.Location = new System.Drawing.Point(259, 180);
+            this.chBbaloon.Name = "chBbaloon";
+            this.chBbaloon.Size = new System.Drawing.Size(159, 17);
+            this.chBbaloon.TabIndex = 4;
+            this.chBbaloon.Text = "Показувати повідомлення";
+            this.chBbaloon.UseVisualStyleBackColor = true;
             // 
             // bRem1
             // 
             this.bRem1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bRem1.Location = new System.Drawing.Point(53, 187);
+            this.bRem1.Location = new System.Drawing.Point(53, 176);
             this.bRem1.Name = "bRem1";
             this.bRem1.Size = new System.Drawing.Size(45, 23);
             this.bRem1.TabIndex = 3;
@@ -156,7 +178,7 @@
             // bAdd1
             // 
             this.bAdd1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bAdd1.Location = new System.Drawing.Point(3, 187);
+            this.bAdd1.Location = new System.Drawing.Point(3, 176);
             this.bAdd1.Name = "bAdd1";
             this.bAdd1.Size = new System.Drawing.Size(44, 23);
             this.bAdd1.TabIndex = 2;
@@ -167,10 +189,31 @@
             // Sec
             // 
             this.Sec.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.Sec.Location = new System.Drawing.Point(150, 190);
+            this.Sec.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.Sec.Location = new System.Drawing.Point(150, 179);
+            this.Sec.Maximum = new decimal(new int[] {
+            9999999,
+            0,
+            0,
+            0});
+            this.Sec.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.Sec.Name = "Sec";
             this.Sec.Size = new System.Drawing.Size(45, 20);
             this.Sec.TabIndex = 1;
+            this.Sec.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Sec.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
             // 
             // p1
             // 
@@ -180,15 +223,20 @@
             this.p1.Controls.Add(this.GV1);
             this.p1.Location = new System.Drawing.Point(3, 3);
             this.p1.Name = "p1";
-            this.p1.Size = new System.Drawing.Size(494, 181);
+            this.p1.Size = new System.Drawing.Size(494, 170);
             this.p1.TabIndex = 0;
             // 
             // GV1
             // 
             this.GV1.AllowUserToAddRows = false;
-            this.GV1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.GV1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.GV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.NN,
             this.DirList,
             this.Place,
             this.Mask,
@@ -197,24 +245,66 @@
             this.GV1.Location = new System.Drawing.Point(0, 0);
             this.GV1.MultiSelect = false;
             this.GV1.Name = "GV1";
-            this.GV1.RowHeadersVisible = false;
-            this.GV1.RowHeadersWidth = 10;
+            this.GV1.RowHeadersWidth = 50;
             this.GV1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.GV1.Size = new System.Drawing.Size(494, 181);
+            this.GV1.Size = new System.Drawing.Size(494, 170);
             this.GV1.TabIndex = 0;
+            this.GV1.DoubleClick += new System.EventHandler(this.GV1_DoubleClick);
             // 
-            // comboBox1
+            // DirList
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(188, 142);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
-            this.comboBox1.TabIndex = 3;
+            this.DirList.HeaderText = "###";
+            this.DirList.Name = "DirList";
+            this.DirList.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // Place
+            // 
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Place.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Place.FillWeight = 200F;
+            this.Place.HeaderText = "Місце призначення";
+            this.Place.Name = "Place";
+            this.Place.Width = 129;
+            // 
+            // Mask
+            // 
+            this.Mask.HeaderText = "Маска";
+            this.Mask.Name = "Mask";
+            // 
+            // Stan
+            // 
+            this.Stan.HeaderText = "Стан";
+            this.Stan.Name = "Stan";
+            this.Stan.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // bCancel
+            // 
+            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.Location = new System.Drawing.Point(401, 142);
+            this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(75, 23);
+            this.bCancel.TabIndex = 4;
+            this.bCancel.Text = "Cancel";
+            this.bCancel.UseVisualStyleBackColor = true;
+            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+            // 
+            // bOK
+            // 
+            this.bOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.bOK.Location = new System.Drawing.Point(289, 142);
+            this.bOK.Name = "bOK";
+            this.bOK.Size = new System.Drawing.Size(75, 23);
+            this.bOK.TabIndex = 3;
+            this.bOK.Text = "OK";
+            this.bOK.UseVisualStyleBackColor = true;
+            this.bOK.Click += new System.EventHandler(this.bOK_Click);
             // 
             // bRem2
             // 
             this.bRem2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bRem2.Location = new System.Drawing.Point(53, 142);
+            this.bRem2.Location = new System.Drawing.Point(53, 134);
             this.bRem2.Name = "bRem2";
             this.bRem2.Size = new System.Drawing.Size(45, 23);
             this.bRem2.TabIndex = 2;
@@ -225,7 +315,7 @@
             // bAdd2
             // 
             this.bAdd2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bAdd2.Location = new System.Drawing.Point(3, 142);
+            this.bAdd2.Location = new System.Drawing.Point(3, 134);
             this.bAdd2.Name = "bAdd2";
             this.bAdd2.Size = new System.Drawing.Size(44, 23);
             this.bAdd2.TabIndex = 1;
@@ -241,7 +331,7 @@
             this.p2.Controls.Add(this.GV2);
             this.p2.Location = new System.Drawing.Point(3, 3);
             this.p2.Name = "p2";
-            this.p2.Size = new System.Drawing.Size(494, 133);
+            this.p2.Size = new System.Drawing.Size(494, 125);
             this.p2.TabIndex = 0;
             // 
             // GV2
@@ -249,36 +339,25 @@
             this.GV2.AllowUserToAddRows = false;
             this.GV2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GV2.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Ndir,
-            this.Path,
+            this.PathScan,
             this.Browse});
             this.GV2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GV2.Location = new System.Drawing.Point(0, 0);
             this.GV2.MultiSelect = false;
             this.GV2.Name = "GV2";
-            this.GV2.RowHeadersVisible = false;
-            this.GV2.RowHeadersWidth = 20;
+            this.GV2.RowHeadersWidth = 50;
             this.GV2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.GV2.Size = new System.Drawing.Size(494, 133);
+            this.GV2.Size = new System.Drawing.Size(494, 125);
             this.GV2.TabIndex = 0;
             this.GV2.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GV2_CellClick);
             this.GV2.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.GV2_CellEndEdit);
             // 
-            // Ndir
+            // PathScan
             // 
-            this.Ndir.Frozen = true;
-            this.Ndir.HeaderText = "№";
-            this.Ndir.Name = "Ndir";
-            this.Ndir.ReadOnly = true;
-            this.Ndir.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Ndir.Width = 30;
-            // 
-            // Path
-            // 
-            this.Path.HeaderText = "Перевіряти папки";
-            this.Path.Name = "Path";
-            this.Path.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Path.Width = 350;
+            this.PathScan.HeaderText = "Перевіряти папки";
+            this.PathScan.Name = "PathScan";
+            this.PathScan.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.PathScan.Width = 350;
             // 
             // Browse
             // 
@@ -288,44 +367,40 @@
             this.Browse.ToolTipText = "Обрати папку";
             this.Browse.Width = 50;
             // 
-            // NN
+            // chBconf
             // 
-            this.NN.Frozen = true;
-            this.NN.HeaderText = "№";
-            this.NN.Name = "NN";
-            this.NN.ReadOnly = true;
-            this.NN.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.NN.Width = 30;
+            this.chBconf.AutoSize = true;
+            this.chBconf.Location = new System.Drawing.Point(115, 134);
+            this.chBconf.Name = "chBconf";
+            this.chBconf.Size = new System.Drawing.Size(80, 17);
+            this.chBconf.TabIndex = 5;
+            this.chBconf.Text = "checkBox1";
+            this.chBconf.UseVisualStyleBackColor = true;
+            this.chBconf.CheckedChanged += new System.EventHandler(this.chBconf_CheckedChanged);
             // 
-            // DirList
+            // cBconf
             // 
-            this.DirList.HeaderText = "###";
-            this.DirList.Name = "DirList";
-            this.DirList.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.DirList.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.cBconf.FormattingEnabled = true;
+            this.cBconf.Location = new System.Drawing.Point(115, 153);
+            this.cBconf.Name = "cBconf";
+            this.cBconf.Size = new System.Drawing.Size(121, 21);
+            this.cBconf.TabIndex = 6;
             // 
-            // Place
+            // chBAutoRun
             // 
-            this.Place.HeaderText = "Місце призначення";
-            this.Place.Name = "Place";
-            // 
-            // Mask
-            // 
-            this.Mask.HeaderText = "Маска";
-            this.Mask.Name = "Mask";
-            // 
-            // Stan
-            // 
-            this.Stan.HeaderText = "Стан";
-            this.Stan.Name = "Stan";
-            this.Stan.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Stan.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.chBAutoRun.AutoSize = true;
+            this.chBAutoRun.Location = new System.Drawing.Point(212, 134);
+            this.chBAutoRun.Name = "chBAutoRun";
+            this.chBAutoRun.Size = new System.Drawing.Size(85, 17);
+            this.chBAutoRun.TabIndex = 7;
+            this.chBAutoRun.Text = "Автозапуск";
+            this.chBAutoRun.UseVisualStyleBackColor = true;
             // 
             // MainF
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(500, 410);
+            this.ClientSize = new System.Drawing.Size(500, 391);
             this.Controls.Add(this.splitContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainF";
@@ -336,7 +411,9 @@
             this.Resize += new System.EventHandler(this.MainF_Resize);
             this.cMS1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.Sec)).EndInit();
             this.p1.ResumeLayout(false);
@@ -364,16 +441,19 @@
         private System.Windows.Forms.ToolStripMenuItem LogTSMI;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem CloseTSMI;
-        private System.Windows.Forms.ComboBox comboBox1;
         public System.Windows.Forms.NotifyIcon nI1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn NN;
+        private System.Windows.Forms.DataGridViewTextBoxColumn PathScan;
+        private System.Windows.Forms.DataGridViewButtonColumn Browse;
         private System.Windows.Forms.DataGridViewTextBoxColumn DirList;
         private System.Windows.Forms.DataGridViewTextBoxColumn Place;
         private System.Windows.Forms.DataGridViewTextBoxColumn Mask;
         private System.Windows.Forms.DataGridViewTextBoxColumn Stan;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Ndir;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Path;
-        private System.Windows.Forms.DataGridViewButtonColumn Browse;
+        private System.Windows.Forms.Button bCancel;
+        private System.Windows.Forms.Button bOK;
+        public System.Windows.Forms.CheckBox chBbaloon;
+        private System.Windows.Forms.ComboBox cBconf;
+        private System.Windows.Forms.CheckBox chBconf;
+        private System.Windows.Forms.CheckBox chBAutoRun;
     }
 }
 
