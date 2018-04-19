@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainF));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             this.nI1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.cMS1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.SettingTSMI = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +50,9 @@
             this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Stan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.chBAutoRun = new System.Windows.Forms.CheckBox();
+            this.cBconf = new System.Windows.Forms.ComboBox();
+            this.chBconf = new System.Windows.Forms.CheckBox();
             this.bCancel = new System.Windows.Forms.Button();
             this.bOK = new System.Windows.Forms.Button();
             this.bRem2 = new System.Windows.Forms.Button();
@@ -58,9 +61,8 @@
             this.GV2 = new System.Windows.Forms.DataGridView();
             this.PathScan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.chBconf = new System.Windows.Forms.CheckBox();
-            this.cBconf = new System.Windows.Forms.ComboBox();
-            this.chBAutoRun = new System.Windows.Forms.CheckBox();
+            this.bAddConf = new System.Windows.Forms.Button();
+            this.bRemConf = new System.Windows.Forms.Button();
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -140,6 +142,8 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.bRemConf);
+            this.splitContainer1.Panel2.Controls.Add(this.bAddConf);
             this.splitContainer1.Panel2.Controls.Add(this.chBAutoRun);
             this.splitContainer1.Panel2.Controls.Add(this.cBconf);
             this.splitContainer1.Panel2.Controls.Add(this.chBconf);
@@ -154,6 +158,7 @@
             // 
             // chBbaloon
             // 
+            this.chBbaloon.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.chBbaloon.AutoSize = true;
             this.chBbaloon.Checked = true;
             this.chBbaloon.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -229,13 +234,13 @@
             // GV1
             // 
             this.GV1.AllowUserToAddRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.GV1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.GV1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
             this.GV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.DirList,
             this.Place,
@@ -259,8 +264,8 @@
             // 
             // Place
             // 
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.Place.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Place.DefaultCellStyle = dataGridViewCellStyle10;
             this.Place.FillWeight = 200F;
             this.Place.HeaderText = "Місце призначення";
             this.Place.Name = "Place";
@@ -277,11 +282,45 @@
             this.Stan.Name = "Stan";
             this.Stan.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             // 
+            // chBAutoRun
+            // 
+            this.chBAutoRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chBAutoRun.AutoSize = true;
+            this.chBAutoRun.Location = new System.Drawing.Point(250, 133);
+            this.chBAutoRun.Name = "chBAutoRun";
+            this.chBAutoRun.Size = new System.Drawing.Size(85, 17);
+            this.chBAutoRun.TabIndex = 7;
+            this.chBAutoRun.Text = "Автозапуск";
+            this.chBAutoRun.UseVisualStyleBackColor = true;
+            // 
+            // cBconf
+            // 
+            this.cBconf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cBconf.FormattingEnabled = true;
+            this.cBconf.Location = new System.Drawing.Point(120, 153);
+            this.cBconf.Name = "cBconf";
+            this.cBconf.Size = new System.Drawing.Size(121, 21);
+            this.cBconf.TabIndex = 6;
+            this.cBconf.Visible = false;
+            this.cBconf.SelectedIndexChanged += new System.EventHandler(this.cBconf_SelectedIndexChanged);
+            // 
+            // chBconf
+            // 
+            this.chBconf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chBconf.AutoSize = true;
+            this.chBconf.Location = new System.Drawing.Point(120, 133);
+            this.chBconf.Name = "chBconf";
+            this.chBconf.Size = new System.Drawing.Size(117, 17);
+            this.chBconf.TabIndex = 5;
+            this.chBconf.Text = "Декілька конфігів";
+            this.chBconf.UseVisualStyleBackColor = true;
+            this.chBconf.CheckedChanged += new System.EventHandler(this.chBconf_CheckedChanged);
+            // 
             // bCancel
             // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.bCancel.Location = new System.Drawing.Point(401, 142);
+            this.bCancel.Location = new System.Drawing.Point(422, 142);
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new System.Drawing.Size(75, 23);
             this.bCancel.TabIndex = 4;
@@ -293,7 +332,7 @@
             // 
             this.bOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.bOK.Location = new System.Drawing.Point(289, 142);
+            this.bOK.Location = new System.Drawing.Point(341, 142);
             this.bOK.Name = "bOK";
             this.bOK.Size = new System.Drawing.Size(75, 23);
             this.bOK.TabIndex = 3;
@@ -304,7 +343,7 @@
             // bRem2
             // 
             this.bRem2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bRem2.Location = new System.Drawing.Point(53, 134);
+            this.bRem2.Location = new System.Drawing.Point(53, 132);
             this.bRem2.Name = "bRem2";
             this.bRem2.Size = new System.Drawing.Size(45, 23);
             this.bRem2.TabIndex = 2;
@@ -315,7 +354,7 @@
             // bAdd2
             // 
             this.bAdd2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bAdd2.Location = new System.Drawing.Point(3, 134);
+            this.bAdd2.Location = new System.Drawing.Point(3, 132);
             this.bAdd2.Name = "bAdd2";
             this.bAdd2.Size = new System.Drawing.Size(44, 23);
             this.bAdd2.TabIndex = 1;
@@ -367,34 +406,27 @@
             this.Browse.ToolTipText = "Обрати папку";
             this.Browse.Width = 50;
             // 
-            // chBconf
+            // bAddConf
             // 
-            this.chBconf.AutoSize = true;
-            this.chBconf.Location = new System.Drawing.Point(115, 134);
-            this.chBconf.Name = "chBconf";
-            this.chBconf.Size = new System.Drawing.Size(80, 17);
-            this.chBconf.TabIndex = 5;
-            this.chBconf.Text = "checkBox1";
-            this.chBconf.UseVisualStyleBackColor = true;
-            this.chBconf.CheckedChanged += new System.EventHandler(this.chBconf_CheckedChanged);
+            this.bAddConf.Location = new System.Drawing.Point(242, 155);
+            this.bAddConf.Name = "bAddConf";
+            this.bAddConf.Size = new System.Drawing.Size(24, 18);
+            this.bAddConf.TabIndex = 8;
+            this.bAddConf.Text = "+";
+            this.bAddConf.UseVisualStyleBackColor = true;
+            this.bAddConf.Visible = false;
+            this.bAddConf.Click += new System.EventHandler(this.bAddConf_Click);
             // 
-            // cBconf
+            // bRemConf
             // 
-            this.cBconf.FormattingEnabled = true;
-            this.cBconf.Location = new System.Drawing.Point(115, 153);
-            this.cBconf.Name = "cBconf";
-            this.cBconf.Size = new System.Drawing.Size(121, 21);
-            this.cBconf.TabIndex = 6;
-            // 
-            // chBAutoRun
-            // 
-            this.chBAutoRun.AutoSize = true;
-            this.chBAutoRun.Location = new System.Drawing.Point(212, 134);
-            this.chBAutoRun.Name = "chBAutoRun";
-            this.chBAutoRun.Size = new System.Drawing.Size(85, 17);
-            this.chBAutoRun.TabIndex = 7;
-            this.chBAutoRun.Text = "Автозапуск";
-            this.chBAutoRun.UseVisualStyleBackColor = true;
+            this.bRemConf.Location = new System.Drawing.Point(96, 155);
+            this.bRemConf.Name = "bRemConf";
+            this.bRemConf.Size = new System.Drawing.Size(24, 18);
+            this.bRemConf.TabIndex = 9;
+            this.bRemConf.Text = "-";
+            this.bRemConf.UseVisualStyleBackColor = true;
+            this.bRemConf.Visible = false;
+            this.bRemConf.Click += new System.EventHandler(this.bRemConf_Click);
             // 
             // MainF
             // 
@@ -454,6 +486,8 @@
         private System.Windows.Forms.ComboBox cBconf;
         private System.Windows.Forms.CheckBox chBconf;
         private System.Windows.Forms.CheckBox chBAutoRun;
+        private System.Windows.Forms.Button bRemConf;
+        private System.Windows.Forms.Button bAddConf;
     }
 }
 

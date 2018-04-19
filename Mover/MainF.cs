@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Xml;
+using System.Net;
 
 namespace Mover
 {
@@ -20,6 +22,7 @@ namespace Mover
         private static Log addlog = new Log();
         private string urlUPD = "";
         private string confIP;
+        public string IP;
 
         public MainF()
         {
@@ -52,6 +55,7 @@ namespace Mover
                 Process.GetCurrentProcess().Kill();
             }
 
+            GetLocalIP();
             ReadIni();
 
             //Check Update in host
@@ -60,6 +64,46 @@ namespace Mover
 
             nI1.Text = "Mover server v." + vers;
 
+
+
+        }
+
+        private void GetLocalIP()
+        {
+            try
+            {
+                IPAddress[] IPadr = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
+                var IPlist = new List<string>();
+
+                foreach (IPAddress ip in IPadr)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        IPlist.Add(ip.ToString());
+                }
+
+                if (IPlist.Count == 1)
+                    IP = IPlist[0];
+                else
+                {
+                    foreach (string ip in IPlist)
+                    {
+                        if (ip.StartsWith("10.")) //костиль для Пошти
+                        {
+                            IP = ip;
+                            break;
+                        }
+                    }
+                }
+
+                if (IP == "")
+                    IP = "127.0.0.1";
+
+                addlog.Info("ІР адреса Mover: {0}", IP);
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При отриманні ІР адреси виникла помилка: {0}", ex.Message);
+            }
 
 
         }
@@ -102,6 +146,10 @@ namespace Mover
             Sec.Value = ini.ReadInteger("TIME", "sek", 100);
             confIP = ini.ReadString("MOOOVER", "IP", "0.0.0.0");
 
+            if (confIP == "0.0.0.0")
+                confIP = IP;
+
+
             urlUPD = ini.ReadString("UPD", "source", "");
             if (urlUPD == "")
             {
@@ -110,6 +158,13 @@ namespace Mover
             }
 
             chBbaloon.Checked = ini.ReadBool("LOG", "ballon", true);
+            chBconf.Checked = ini.ReadBool("CONF", "act", false);
+
+            int confCount = ini.ReadInteger("CONF", "count", 0);
+            for (int i = 1; i <= confCount; i++)
+            {
+                cBconf.Items.Add(ini.ReadString("CONF", "conmName." + i.ToString(),""));
+            }
 
         }
 
@@ -403,6 +458,18 @@ namespace Mover
             ini.WriteString("TIME", "sek", Sec.Value.ToString());
             ini.WriteString("LOG", "ballon", Convert.ToInt32(chBbaloon.Checked).ToString());
 
+            if (chBconf.Checked)
+                ini.WriteString("MOOOVER", "IP", cBconf.SelectedItem.ToString()); //TODO: Error write potok
+            else
+                ini.WriteString("MOOOVER", "IP", "0.0.0.0");
+
+            ini.WriteString("CONF", "act", Convert.ToInt32(chBconf.Checked).ToString());
+            ini.WriteString("CONF", "count", cBconf.Items.Count.ToString());
+            for (int i = 0; i < cBconf.Items.Count; i++)
+            {
+                ini.WriteString("CONF", "conmName." + (i + 1).ToString(), cBconf.Items[i].ToString());
+            }
+
         }
 
         private void bCancel_Click(object sender, EventArgs e)
@@ -456,40 +523,55 @@ namespace Mover
             return hash.ToString();
         }
 
+        /// <summary>
+        /// Check and get config from server
+        /// </summary>
         private void GetConfFromServer()
         {
-            string strToHash = "";
-
-            foreach (DataGridViewRow row in GV1.Rows)
+            try
             {
-                strToHash += String.Format("{0}{1}{2}{3}", row.Cells[0].Value, row.Cells[1].Value, row.Cells[2].Value, row.Cells[3].Value);
+
+                string strToHash = "";
+
+                foreach (DataGridViewRow row in GV1.Rows)
+                {
+                    strToHash += String.Format("{0}{1}{2}{3}", row.Cells[0].Value, row.Cells[1].Value, row.Cells[2].Value, row.Cells[3].Value);
+                }
+                foreach (DataGridViewRow row in GV2.Rows)
+                {
+                    strToHash += String.Format("{0}", row.Cells[0].Value);
+                }
+                strToHash += String.Format("{0}{1}", Sec.Value.ToString(), Convert.ToInt32(chBbaloon.Checked));
+
+                MoverWeb.MoverServ MW = new MoverWeb.MoverServ();
+
+
+                string response = MW.GetCnf(Hash(strToHash), confIP);
+
+                switch (response)
+                {
+                    case "OK":
+                        {
+                            addlog.Debug("Конфігурація на сервері ідентична!");
+                            return;
+                        }
+
+                    case "Must Reg":
+                        addlog.Info("Такий Mover ще не зареєстрований!");
+                        RegInServer();
+                        break;
+
+                    default: //check data or error
+                        if (response.IndexOf("NewDataSet") > -1)
+                            ApplyConfFromServer(response);
+                        else
+                            addlog.Error("при отриаманні кофігураці виникла помилка на сервері: {0}", response);
+                        break;
+                }
             }
-            foreach (DataGridViewRow row in GV2.Rows)
+            catch (Exception ex)
             {
-                strToHash += String.Format("{0}", row.Cells[0].Value);
-            }
-            strToHash += String.Format("{0}{1}", Sec.Value.ToString(), Convert.ToInt32(chBbaloon.Checked));
-
-            MoverWeb.MoverServ MW = new MoverWeb.MoverServ();
-
-            string response = MW.GetCnf(Hash(strToHash), confIP);
-
-            switch (response)
-            {
-                case "OK":
-                    {
-                        addlog.Debug("Конфігурація на сервері ідентична!");
-                        return;
-                    }
-
-                case "Must Reg":
-                    addlog.Info("Такий Mover ще не зареєстрований!");
-                    RegInServer();
-                    break;
-
-                default:
-                    ApplyConfFromServer(response);
-                    break;
+                addlog.Error("При отрмані конфігурації виникла помилка: {0}", ex.Message);
             }
 
         }
@@ -526,15 +608,106 @@ namespace Mover
         /// <param name="response"></param>
         private void ApplyConfFromServer(string response)
         {
-           //TODO: zapovnyty conf from server
+            try
+            {
+                string[] xml = response.Split(new string[] { "</NewDataSet>" }, StringSplitOptions.RemoveEmptyEntries);
+                //TODO : ERROR when clear (only 2)
+                xml[0] += "</NewDataSet>";
+                xml[1] += "</NewDataSet>";
+                xml[2] = "<NewDataSet>" + xml[2] + "</NewDataSet>";
 
+                ConfFromXML(xml[0], GV1);
+                ConfFromXML(xml[1], GV2);
 
+                XmlDocument xmldoc = new XmlDocument();
+                xmldoc.LoadXml(xml[2]);
+
+                if (int.TryParse(xmldoc.GetElementsByTagName("INTERVAL")[0].InnerText, out int time))
+                    Sec.Value = time;
+                if (int.TryParse(xmldoc.GetElementsByTagName("BALOON")[0].InnerText, out int baloon))
+                    chBbaloon.Checked = Convert.ToBoolean(baloon);
+
+                addlog.Info("Успішно збережено конфігурацію \"{0}\" із сервера", confIP);
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("При збереженні конфігурації виникла помилка: {0}", ex.Message);
+            }
 
         }
+
+        private void ConfFromXML(string xml, DataGridView GV)
+        {
+            try
+            {
+                XmlDocument xmldoc = new XmlDocument();
+                xmldoc.LoadXml(xml);
+
+                GV.Rows.Clear();
+
+                XmlElement elem = xmldoc.DocumentElement;
+                foreach (XmlNode node in elem)
+                {
+                    if (node.HasChildNodes)
+                    {
+                        int i = GV.Rows.Add();
+                        GV.Rows[i].HeaderCell.Value = (i + 1).ToString();
+                        int j = 0;
+
+                        foreach (XmlNode chNode in node)
+                        {
+                            GV.Rows[i].Cells[j].Value = chNode.InnerText;
+                            j++;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При заповненні даними із сервера виникла помилка: {0}", ex.Message);
+            }
+        }
+            
 
         private void chBconf_CheckedChanged(object sender, EventArgs e)
         {
-            GetConfFromServer();
+
+            cBconf.Visible = chBconf.Checked;
+            bAddConf.Visible = chBconf.Checked;
+            bRemConf.Visible = chBconf.Checked;
+            //GetConfFromServer();
+        }
+
+        private void cBconf_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            confIP = cBconf.Text.Trim();
+            if (confIP != "")
+                GetConfFromServer();
+            else
+                confIP = IP;
+        }
+
+        private void bAddConf_Click(object sender, EventArgs e)
+        {
+            bool unic = true;
+
+            foreach (string item in cBconf.Items)
+            {
+                if (item.ToString() == cBconf.Text)
+                {
+                    unic = false;
+                    break;
+                }
+            }
+
+            if (unic)
+                cBconf.Items.Add(cBconf.Text);
+        }
+
+        private void bRemConf_Click(object sender, EventArgs e)
+        {
+            cBconf.Items.Remove(cBconf.SelectedItem);
         }
     }
 }
+
