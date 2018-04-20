@@ -149,7 +149,10 @@ namespace Mover
             if (confIP == "0.0.0.0")
                 confIP = IP;
             else
+            {
                 cBconf.Text = confIP;
+                addlog.Debug("Конфігурація на сервері: {0}",confIP);
+            }
 
 
             urlUPD = ini.ReadString("UPD", "source", "");
@@ -426,6 +429,7 @@ namespace Mover
             if (dlgRez == DialogResult.Yes)
             {               
                 Thread write = new Thread(WriteInvoke);
+                write.Start();
 
             }
             if (dlgRez == DialogResult.No)
@@ -666,7 +670,8 @@ namespace Mover
         {
             try
             {
-                string[] xml = response.Split(new string[] { "</NewDataSet>" }, StringSplitOptions.RemoveEmptyEntries);               
+                string[] xml = response.Split(new string[] { "</NewDataSet>" }, StringSplitOptions.RemoveEmptyEntries);
+                
                 string tmballon; // timer and baloon value
                 if (xml.Count() != 3)
                 {
@@ -793,6 +798,77 @@ namespace Mover
                 cBconf.SelectedItem = cBconf.Items[0];
             }
         }
+
+        private void SaveCfgIntoServer()
+        {
+            try
+            {
+                string dir_id = "";
+                string MC = "";
+                string mask = "";
+                string stat = "";
+                string dir = "";
+
+                foreach (DataGridViewRow row in GV1.Rows)
+                {
+                    if (dir_id == "")
+                        dir_id = row.Cells[0].Value.ToString();
+                    else
+                        dir_id += "^" + row.Cells[0].Value.ToString();
+
+                    if (MC == "")
+                        MC = row.Cells[1].Value.ToString();
+                    else
+                        MC += "^" + row.Cells[0].Value.ToString();
+
+                    if (mask == "")
+                        mask = row.Cells[0].Value.ToString();
+                    else
+                        mask += "^" + row.Cells[0].Value.ToString();
+
+                    if (stat == "")
+                        stat = row.Cells[0].Value.ToString();
+                    else
+                        stat += "^" + row.Cells[0].Value.ToString();
+                }
+                foreach (DataGridViewRow row in GV2.Rows)
+                {
+                    if (dir == "")
+                        dir = row.Cells[0].Value.ToString();
+                    else
+                        dir += "^" + row.Cells[0].Value.ToString();
+                }
+
+
+
+                MoverWeb.MoverServ MW = new MoverWeb.MoverServ();
+                string response = MW.SetCnf(dir_id, MC, mask, stat, dir, confIP, Convert.ToInt32(Sec.Value), Convert.ToInt32(chBbaloon.Checked));
+
+                switch (response)
+                {
+                    case "OK":
+                        {
+                            addlog.Debug("Конфігурацію на сервері оновленно!");
+                            return;
+                        }
+
+                    case "Must Reg":
+                        addlog.Info("Такий Mover ще не зареєстрований!");
+                        RegInServer();
+                        break;
+
+                    default: // error                        
+                        addlog.Error("При збережені кофігурації виникла помилка на сервері: {0}", response);
+                        break;
+                }
+
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("При збереженні конфігурації на сервер виникла помилка: {0}", ex.Message);
+            }
+        }
+
     }
 }
 
