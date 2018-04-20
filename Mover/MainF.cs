@@ -148,6 +148,8 @@ namespace Mover
 
             if (confIP == "0.0.0.0")
                 confIP = IP;
+            else
+                cBconf.Text = confIP;
 
 
             urlUPD = ini.ReadString("UPD", "source", "");
@@ -161,6 +163,7 @@ namespace Mover
             chBconf.Checked = ini.ReadBool("CONF", "act", false);
 
             int confCount = ini.ReadInteger("CONF", "count", 0);
+            cBconf.Items.Clear();
             for (int i = 1; i <= confCount; i++)
             {
                 cBconf.Items.Add(ini.ReadString("CONF", "conmName." + i.ToString(),""));
@@ -413,6 +416,7 @@ namespace Mover
             MinimizMainForm();
         }
 
+        
         private void MinimizMainForm()
         {
             DialogResult dlgRez = MessageBox.Show("Зберегти зміни? ", "Mover", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
@@ -420,10 +424,9 @@ namespace Mover
             if (dlgRez == DialogResult.Cancel)
                 return;
             if (dlgRez == DialogResult.Yes)
-            {
-                BackgroundWorker wrk = new BackgroundWorker();
-                wrk.DoWork += BGW_WriteIni_DoWork;
-                wrk.RunWorkerAsync();
+            {               
+                Thread write = new Thread(WriteInvoke);
+
             }
             if (dlgRez == DialogResult.No)
                 ReadIni();
@@ -432,43 +435,64 @@ namespace Mover
             this.WindowState = FormWindowState.Minimized;
         }
 
+        public delegate void SaveIni(); // delegat for new Thread for write ini file
+        private void WriteInvoke()
+        {
+            SaveIni dlgtSave = new SaveIni(WriteIni);
+            Invoke(dlgtSave);
+
+        }
+
         /// <summary>
         /// Write parametr into ini files
         /// </summary>
         private void WriteIni()
         {
-            IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
-
-            ini.WriteString("MOOOVER", "CountDir", GV2.RowCount.ToString());
-            ini.WriteString("MOOOVER", "Count", GV1.RowCount.ToString());
-
-            for (int i = 0; i < GV1.RowCount; i++)
+            try
             {
-                ini.WriteString("DIRNOM", "dirNOM." + (i + 1).ToString(), GV1[0, i].Value.ToString());
-                ini.WriteString("HOSTS", "Host." + (i + 1).ToString(), GV1[1, i].Value.ToString());
-                ini.WriteString("HOSTS_MASK", "Host Mask." + (i + 1).ToString(), GV1[2, i].Value.ToString());
-                ini.WriteString("STAN", "Stan." + (i + 1).ToString(), GV1[3, i].Value.ToString());
+                IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
+
+                ini.WriteString("MOOOVER", "CountDir", GV2.RowCount.ToString());
+                ini.WriteString("MOOOVER", "Count", GV1.RowCount.ToString());
+
+                for (int i = 0; i < GV1.RowCount; i++)
+                {
+                    ini.WriteString("DIRNOM", "dirNOM." + (i + 1).ToString(), GV1[0, i].Value.ToString());
+                    ini.WriteString("HOSTS", "Host." + (i + 1).ToString(), GV1[1, i].Value.ToString());
+                    ini.WriteString("HOSTS_MASK", "Host Mask." + (i + 1).ToString(), GV1[2, i].Value.ToString());
+                    ini.WriteString("STAN", "Stan." + (i + 1).ToString(), GV1[3, i].Value.ToString());
+                }
+
+                for (int i = 0; i < GV2.RowCount; i++)
+                {
+                    ini.WriteString("DIR", "dir." + (i + 1).ToString(), GV2[0, i].Value.ToString());
+                }
+
+                ini.WriteString("TIME", "sek", Sec.Value.ToString());
+                ini.WriteString("LOG", "ballon", Convert.ToInt32(chBbaloon.Checked).ToString());
+
+                if (chBconf.Checked && cBconf.Text != "")
+                    ini.WriteString("MOOOVER", "IP", cBconf.Text);
+                else
+                {
+                    ini.WriteString("MOOOVER", "IP", "0.0.0.0");
+                    chBconf.Checked = false;
+                }
+
+                ini.WriteString("CONF", "act", Convert.ToInt32(chBconf.Checked).ToString());
+                ini.WriteString("CONF", "count", cBconf.Items.Count.ToString());
+                for (int i = 0; i < cBconf.Items.Count; i++)
+                {
+                    ini.WriteString("CONF", "conmName." + (i + 1).ToString(), cBconf.Items[i].ToString());
+                }
+
+                addlog.Info("Конфігурацію збереженно!");
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("При збереженні конфігурації виникла помилка: {0}",ex.Message);
             }
 
-            for (int i = 0; i < GV2.RowCount; i++)
-            {
-                ini.WriteString("DIR", "dir." + (i + 1).ToString(), GV2[0, i].Value.ToString());
-            }
-
-            ini.WriteString("TIME", "sek", Sec.Value.ToString());
-            ini.WriteString("LOG", "ballon", Convert.ToInt32(chBbaloon.Checked).ToString());
-
-            if (chBconf.Checked)
-                ini.WriteString("MOOOVER", "IP", cBconf.SelectedItem.ToString()); //TODO: Error write potok
-            else
-                ini.WriteString("MOOOVER", "IP", "0.0.0.0");
-
-            ini.WriteString("CONF", "act", Convert.ToInt32(chBconf.Checked).ToString());
-            ini.WriteString("CONF", "count", cBconf.Items.Count.ToString());
-            for (int i = 0; i < cBconf.Items.Count; i++)
-            {
-                ini.WriteString("CONF", "conmName." + (i + 1).ToString(), cBconf.Items[i].ToString());
-            }
 
         }
 
@@ -484,9 +508,58 @@ namespace Mover
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BGW_WriteIni_DoWork(object sender, DoWorkEventArgs e)
+        private void BGW_GetConfFromServer_DoWork(object sender, DoWorkEventArgs e)
         {
-            WriteIni();
+            e.Result = GetConfFromServer();
+        }
+
+        private void BGW_GetConfFromServer_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            try
+            {
+                if (e.Error != null)
+                {
+                    addlog.Error("При отриаманні кофігураці виникла помилка на сервері: {0}", e.Error.Message);
+                    return;
+                }
+
+                string response = e.Result.ToString();
+
+                switch (response)
+                {
+                    case "OK":
+                        {
+                            addlog.Debug("Конфігурація на сервері ідентична!");
+                            return;
+                        }
+
+                    case "Must Reg":
+                        addlog.Info("Такий Mover ще не зареєстрований!");
+                        RegInServer();
+                        break;
+
+                    default: //check data or error
+                        if (response.IndexOf("NewDataSet") > -1)
+                            ApplyConfFromServer(response);
+                        else
+                            addlog.Error("При отриаманні кофігураці виникла помилка на сервері: {0}", response);
+                        break;
+                }
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("При отриаманні кофігураці виникла помилка: {0}", ex.Message);
+            }
+            finally
+            {
+                foreach (Control cntrl in this.Controls)
+                {
+                    cntrl.Enabled = true;
+                }
+            }
+
+                
+
         }
 
         /// <summary>
@@ -526,7 +599,7 @@ namespace Mover
         /// <summary>
         /// Check and get config from server
         /// </summary>
-        private void GetConfFromServer()
+        private object GetConfFromServer()
         {
             try
             {
@@ -548,30 +621,13 @@ namespace Mover
 
                 string response = MW.GetCnf(Hash(strToHash), confIP);
 
-                switch (response)
-                {
-                    case "OK":
-                        {
-                            addlog.Debug("Конфігурація на сервері ідентична!");
-                            return;
-                        }
-
-                    case "Must Reg":
-                        addlog.Info("Такий Mover ще не зареєстрований!");
-                        RegInServer();
-                        break;
-
-                    default: //check data or error
-                        if (response.IndexOf("NewDataSet") > -1)
-                            ApplyConfFromServer(response);
-                        else
-                            addlog.Error("при отриаманні кофігураці виникла помилка на сервері: {0}", response);
-                        break;
-                }
+                return response;
+                
             }
             catch (Exception ex)
             {
                 addlog.Error("При отрмані конфігурації виникла помилка: {0}", ex.Message);
+                return ex.Message;
             }
 
         }
@@ -610,28 +666,37 @@ namespace Mover
         {
             try
             {
-                string[] xml = response.Split(new string[] { "</NewDataSet>" }, StringSplitOptions.RemoveEmptyEntries);
-                //TODO : ERROR when clear (only 2)
-                xml[0] += "</NewDataSet>";
-                xml[1] += "</NewDataSet>";
-                xml[2] = "<NewDataSet>" + xml[2] + "</NewDataSet>";
+                string[] xml = response.Split(new string[] { "</NewDataSet>" }, StringSplitOptions.RemoveEmptyEntries);               
+                string tmballon; // timer and baloon value
+                if (xml.Count() != 3)
+                {
+                    GV1.Rows.Clear();
+                    GV2.Rows.Clear();
+                    tmballon = "<New>" + xml[0] + "</New>";
+                }
+                else
+                {
+                    xml[0] += "</NewDataSet>";
+                    xml[1] += "</NewDataSet>";
+                    tmballon = "<NewDataSet>" + xml[2] + "</NewDataSet>";
 
-                ConfFromXML(xml[0], GV1);
-                ConfFromXML(xml[1], GV2);
+                    ConfFromXML(xml[0], GV1);
+                    ConfFromXML(xml[1], GV2);
+                }
 
                 XmlDocument xmldoc = new XmlDocument();
-                xmldoc.LoadXml(xml[2]);
+                xmldoc.LoadXml(tmballon);
 
                 if (int.TryParse(xmldoc.GetElementsByTagName("INTERVAL")[0].InnerText, out int time))
                     Sec.Value = time;
                 if (int.TryParse(xmldoc.GetElementsByTagName("BALOON")[0].InnerText, out int baloon))
                     chBbaloon.Checked = Convert.ToBoolean(baloon);
 
-                addlog.Info("Успішно збережено конфігурацію \"{0}\" із сервера", confIP);
+                addlog.Info("Успішно отримано конфігурацію \"{0}\" із сервера", confIP);
             }
             catch(Exception ex)
             {
-                addlog.Error("При збереженні конфігурації виникла помилка: {0}", ex.Message);
+                addlog.Error("При отриманні конфігурації виникла помилка: {0}", ex.Message);
             }
 
         }
@@ -671,7 +736,6 @@ namespace Mover
 
         private void chBconf_CheckedChanged(object sender, EventArgs e)
         {
-
             cBconf.Visible = chBconf.Checked;
             bAddConf.Visible = chBconf.Checked;
             bRemConf.Visible = chBconf.Checked;
@@ -682,7 +746,19 @@ namespace Mover
         {
             confIP = cBconf.Text.Trim();
             if (confIP != "")
-                GetConfFromServer();
+            {
+                foreach (Control cntrl in this.Controls)
+                {
+                    cntrl.Enabled = false;
+                }
+
+                BackgroundWorker bgw = new BackgroundWorker();
+                bgw.DoWork += BGW_GetConfFromServer_DoWork;
+                bgw.RunWorkerCompleted += BGW_GetConfFromServer_Completed;
+                bgw.RunWorkerAsync();
+                
+            }
+                //GetConfFromServer();
             else
                 confIP = IP;
         }
@@ -695,18 +771,27 @@ namespace Mover
             {
                 if (item.ToString() == cBconf.Text)
                 {
+                    cBconf.SelectedItem = item;
                     unic = false;
                     break;
                 }
             }
 
             if (unic)
-                cBconf.Items.Add(cBconf.Text);
+            {
+                int ind = cBconf.Items.Add(cBconf.Text);
+                cBconf.SelectedIndex = ind;
+
+            }
         }
 
         private void bRemConf_Click(object sender, EventArgs e)
         {
             cBconf.Items.Remove(cBconf.SelectedItem);
+            if (cBconf.Items.Count > 0)
+            {
+                cBconf.SelectedItem = cBconf.Items[0];
+            }
         }
     }
 }
