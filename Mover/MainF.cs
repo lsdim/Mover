@@ -23,6 +23,7 @@ namespace Mover
         private string urlUPD = "";
         private string confIP;
         public string IP;
+        public string HashConf;
 
         public MainF()
         {
@@ -58,6 +59,7 @@ namespace Mover
             GetLocalIP();
             ReadIni();
 
+            HashConf = GetConfHash();
             //Check Update in host
             // UpdateApl upd = new Mover.UpdateApl(urlUPD);
             //  upd.Download();
@@ -374,6 +376,8 @@ namespace Mover
             //    MinimizMainForm();
             // this.Hide();
             //TODO : Minimize!!!
+            if (this.WindowState != FormWindowState.Minimized)
+                HashConf = GetConfHash();
         }
 
         private void SettingTSMI_Click(object sender, EventArgs e)
@@ -395,6 +399,7 @@ namespace Mover
             {
                 this.Show();
                 this.WindowState = FormWindowState.Normal;
+                HashConf = GetConfHash();
 
             }
         }
@@ -422,28 +427,34 @@ namespace Mover
         
         private void MinimizMainForm()
         {
-            DialogResult dlgRez = MessageBox.Show("Зберегти зміни? ", "Mover", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (GetConfHash() != HashConf)
+            {
+                DialogResult dlgRez = MessageBox.Show("Зберегти зміни? ", "Mover", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
-            if (dlgRez == DialogResult.Cancel)
-                return;
-            if (dlgRez == DialogResult.Yes)
-            {               
-                Thread write = new Thread(WriteInvoke);
-                write.Start();
+                if (dlgRez == DialogResult.Cancel)
+                    return;
+                if (dlgRez == DialogResult.Yes)
+                {
+                    Thread write = new Thread(WriteInvoke);
+                    write.Start();
 
+                }
+                if (dlgRez == DialogResult.No)
+                    ReadIni();
             }
-            if (dlgRez == DialogResult.No)
-                ReadIni();
-
             this.Hide();
             this.WindowState = FormWindowState.Minimized;
         }
 
         public delegate void SaveIni(); // delegat for new Thread for write ini file
+        public delegate void SaveServ(); // delegat for new Thread for write into server
         private void WriteInvoke()
         {
             SaveIni dlgtSave = new SaveIni(WriteIni);
             Invoke(dlgtSave);
+
+            SaveServ dlgServ = new SaveServ(SaveCfgIntoServer);
+            Invoke(dlgServ);
 
         }
 
@@ -600,14 +611,10 @@ namespace Mover
             return hash.ToString();
         }
 
-        /// <summary>
-        /// Check and get config from server
-        /// </summary>
-        private object GetConfFromServer()
+        private string GetConfHash()
         {
             try
             {
-
                 string strToHash = "";
 
                 foreach (DataGridViewRow row in GV1.Rows)
@@ -620,10 +627,43 @@ namespace Mover
                 }
                 strToHash += String.Format("{0}{1}", Sec.Value.ToString(), Convert.ToInt32(chBbaloon.Checked));
 
-                MoverWeb.MoverServ MW = new MoverWeb.MoverServ();
+                return Hash(strToHash);
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При отрмані контрольної суми виникла помилка: {0}", ex.Message);
+                return "";
+            }
+        }
 
 
-                string response = MW.GetCnf(Hash(strToHash), confIP);
+        /// <summary>
+        /// Check and get config from server
+        /// </summary>
+        private object GetConfFromServer()
+        {
+            try
+            {
+                /*
+                string strToHash = "";
+
+                foreach (DataGridViewRow row in GV1.Rows)
+                {
+                    strToHash += String.Format("{0}{1}{2}{3}", row.Cells[0].Value, row.Cells[1].Value, row.Cells[2].Value, row.Cells[3].Value);
+                }
+                foreach (DataGridViewRow row in GV2.Rows)
+                {
+                    strToHash += String.Format("{0}", row.Cells[0].Value);
+                }
+                strToHash += String.Format("{0}{1}", Sec.Value.ToString(), Convert.ToInt32(chBbaloon.Checked));
+                */
+                string hash = GetConfHash();
+                if (hash == "")
+                    return "";
+
+                MoverWeb.MoverServ MW = new MoverWeb.MoverServ();                
+
+                string response = MW.GetCnf(hash, confIP);
 
                 return response;
                 
@@ -819,17 +859,17 @@ namespace Mover
                     if (MC == "")
                         MC = row.Cells[1].Value.ToString();
                     else
-                        MC += "^" + row.Cells[0].Value.ToString();
+                        MC += "^" + row.Cells[1].Value.ToString();
 
                     if (mask == "")
-                        mask = row.Cells[0].Value.ToString();
+                        mask = row.Cells[2].Value.ToString();
                     else
-                        mask += "^" + row.Cells[0].Value.ToString();
+                        mask += "^" + row.Cells[2].Value.ToString();
 
                     if (stat == "")
-                        stat = row.Cells[0].Value.ToString();
+                        stat = row.Cells[3].Value.ToString();
                     else
-                        stat += "^" + row.Cells[0].Value.ToString();
+                        stat += "^" + row.Cells[3].Value.ToString();
                 }
                 foreach (DataGridViewRow row in GV2.Rows)
                 {
@@ -844,11 +884,14 @@ namespace Mover
                 MoverWeb.MoverServ MW = new MoverWeb.MoverServ();
                 string response = MW.SetCnf(dir_id, MC, mask, stat, dir, confIP, Convert.ToInt32(Sec.Value), Convert.ToInt32(chBbaloon.Checked));
 
+                IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
+
                 switch (response)
                 {
                     case "OK":
                         {
-                            addlog.Debug("Конфігурацію на сервері оновленно!");
+                            addlog.Debug("Конфігурацію на сервері оновленно!");                            
+                            ini.WriteString("UPD", "Save", "0");                            
                             return;
                         }
 
@@ -858,7 +901,8 @@ namespace Mover
                         break;
 
                     default: // error                        
-                        addlog.Error("При збережені кофігурації виникла помилка на сервері: {0}", response);
+                        addlog.Error("При збережені кофігурації виникла помилка на сервері: {0}", response);                       
+                        ini.WriteString("UPD", "Save", "1");
                         break;
                 }
 
@@ -866,9 +910,16 @@ namespace Mover
             catch(Exception ex)
             {
                 addlog.Error("При збереженні конфігурації на сервер виникла помилка: {0}", ex.Message);
+                IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
+                ini.WriteString("UPD", "Save", "1");
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Copy);
+            mv.Run();
+        }
     }
 }
 

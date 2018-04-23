@@ -5,6 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Ionic;
+using Ionic.Zip;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Mover
 {
@@ -112,7 +116,10 @@ namespace Mover
             switch (oper)
             {
                 case Operation.Copy:
-                    CopyFile(dir_destin, files, false);
+                    if (elem.TCP)
+                        CopyFileTCP(dir_destin, files, false);
+                    else
+                        CopyFile(dir_destin, files, false);
                     break;
                 case Operation.CopyRepl:
                     CopyFile(dir_destin, files, true);
@@ -412,7 +419,6 @@ namespace Mover
                     addlog.Error("При видаленні файлу \"{0}\" виникла помилка: \"{1}\"", f, ex.Message);
                 }
             }
-
         }
 
         //Create List of Files (search files by pattern)
@@ -706,10 +712,73 @@ namespace Mover
             }
             catch (Exception ex)
             {
-                addlog.Debug("При отриманні маски {0} з дати {1} виникла помилка: {2}", mask, ddt.ToString(), ex.Message);
+                addlog.Error("При отриманні маски {0} з дати {1} виникла помилка: {2}", mask, ddt.ToString(), ex.Message);
                 new_mask = "";
                 return ddt;                
             }
+        }
+
+        private static Stream ZipingFile(IEnumerable<string> files)
+        {
+            try
+            {
+                Stream rez = new MemoryStream();
+                ZipFile zip = new ZipFile();
+                zip.CompressionLevel = Ionic.Zlib.CompressionLevel.BestCompression;
+                zip.CompressionMethod = CompressionMethod.BZip2;
+                zip.SaveProgress += SaveProgress;
+                zip.AddFiles(files);
+                zip.Save(rez);
+
+                return rez;
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При архівуванні файлів виникла помилка: {0}", ex.Message);
+                return null;
+            }
+
+
+        }
+
+        private static void SaveProgress(object sender, SaveProgressEventArgs e)
+        {
+            switch (e.EventType)
+            {
+                case ZipProgressEventType.Saving_Started:
+                    addlog.Debug("Початок архівування файлів:");
+                    break;
+                case ZipProgressEventType.Saving_BeforeWriteEntry:
+                    addlog.Debug(e.CurrentEntry.FileName);
+                    break;
+                case ZipProgressEventType.Saving_Completed:
+                    addlog.Debug("Кінець архівування.");
+                    break;
+            }
+        }
+
+
+        private static void CopyFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
+        {
+            Stream strm = ZipingFile(files);
+
+            TcpClient tcpC = new TcpClient(IP, 30001);
+            NetworkStream nts = tcpC.GetStream();
+            BinaryFormatter format = new BinaryFormatter();
+            byte[] buf = new byte[1024];
+            int count;
+            BinaryReader br = new BinaryReader(strm);
+            long k = strm.Length;
+            format.Serialize(nts, k.ToString());
+            format.Serialize(nts, destination);
+            while ((count = br.Read(buf, 0, 1024)) > 0)
+            {
+                format.Serialize(nts, buf);
+            }               
+            
+
+            //TODO: TCP send file
+
         }
         
     }
