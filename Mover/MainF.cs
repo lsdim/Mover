@@ -942,7 +942,7 @@ namespace Mover
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Copy);
+            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Move);
             mv.Run();
         }
 
@@ -988,8 +988,13 @@ namespace Mover
 
                     zip.ExtractProgress += ExtractProgress;
 
+                    ExtractExistingFileAction owerwrite;
+                    if (lng_pth[2] == "1")
+                        owerwrite = ExtractExistingFileAction.OverwriteSilently;
+                    else
+                        owerwrite = ExtractExistingFileAction.DoNotOverwrite;
 
-                    zip.ExtractAll(lng_pth[1], ExtractExistingFileAction.OverwriteSilently);
+                    zip.ExtractAll(lng_pth[1], owerwrite);
                     zip.Dispose();
                     File.Delete(nameFile);
                 }

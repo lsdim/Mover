@@ -153,23 +153,35 @@ namespace Mover
 
 
             IEnumerable<string> files = SafeEnumerateFiles(dirs_from, patterns, recur);
+
+            if (files.Count() == 0)
+                return;
                         
             switch (oper)
             {
                 case Operation.Copy:
                     if (elem.TCP)
-                        CopyFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
+                        SendFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
                     else
                         CopyFile(dir_destin, files, false);
                     break;
                 case Operation.CopyRepl:
-                    CopyFile(dir_destin, files, true);
+                    if (elem.TCP)
+                        SendFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, true);
+                    else
+                        CopyFile(dir_destin, files, true);
                     break;
                 case Operation.Move:
-                    MoveFile(dir_destin, files, false);
+                    if (elem.TCP)
+                        MoveFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
+                    else
+                        MoveFile(dir_destin, files, false);
                     break;
                 case Operation.MoveRepl:
-                    MoveFile(dir_destin, files, true);
+                    if (elem.TCP)
+                        MoveFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, true);
+                    else
+                        MoveFile(dir_destin, files, true);
                     break;
                 case Operation.Delete:
                     DeleteFile(files);
@@ -769,10 +781,11 @@ namespace Mover
                     CompressionLevel = Ionic.Zlib.CompressionLevel.BestCompression,
                     CompressionMethod = CompressionMethod.BZip2
                 };
+               // zip.UpdateFile()
                 zip.SaveProgress += SaveProgress;
                 foreach (string f in files)
                 {
-                    zip.AddFile(f, "");
+                    zip.UpdateFile(f, "");
                     addlog.Debug("В архів додано файл - {0}", f);
                 }
                 //zip.AddFiles(files);
@@ -805,12 +818,37 @@ namespace Mover
             }
         }
 
-
-        private static void CopyFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
+        private static void MoveFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
         {
             try
             {
+                if (SendFileTCP(IP, destination, files, owerwrite))
+                {
+                    foreach (string f in files)
+                        File.Delete(f);
+
+                    addlog.Info("Файли успішно переміщено");
+                }
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("Помилка при переміщенні файлів по ТСР: {0}", ex.Message);
+            }
+        }
+
+        private static bool SendFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
+        {
+            try
+            {
+               // if (files.Count() == 0)
+               //     return false;
+
+                addlog.Debug("Початок відправки файлів по ТСР на {0}", IP);
+
                 Stream fs = ZipingFile(files);
+                if (fs == null)
+                    return false;
+
                 fs.Seek(0, SeekOrigin.Begin);
 
                 TcpClient tcpC = new TcpClient(IP, 30001);
@@ -820,20 +858,26 @@ namespace Mover
                 int count;
                 BinaryReader br = new BinaryReader(fs);
                 long k = fs.Length;
-                format.Serialize(nts, k.ToString() + "|" + destination); //Send size and destination
+                format.Serialize(nts, k.ToString() + "|" + destination + "|" + Convert.ToInt32(owerwrite).ToString()); //Send size and destination
 
                 while ((count = br.Read(buf, 0, 1280)) > 0)
                 {
                     format.Serialize(nts, buf);                    
                 }
+
+                fs.Close();
+
+                addlog.Info("Файли успішно відправлено");
+                return true;
             }
             catch(Exception ex)
             {
                 addlog.Error("При відправці файлів по ТСР виникла помилка: {0}", ex.Message);
+                return false;
             }
             
 
-            //TODO: add comment to TCP send file
+            //TODO: додати функцію для копіювання??
 
         }
         
