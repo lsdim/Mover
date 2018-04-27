@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -16,8 +15,11 @@ namespace Mover
         string new_name = Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ".upd";
         private string url;
         private string cSum = "";
-        private string updcSum = "";
-        private string updName = "updater.exe";
+ //       private string updcSum = "";
+        private string updName = "Updater.exe";
+        private string fSum = "";
+        private string fName = "";
+
 
         private static Log addlog = new Log();
 
@@ -47,12 +49,20 @@ namespace Mover
             }
         }
 
-        private void UPDCompleted(object sender, AsyncCompletedEventArgs e)
+      /*  private void UPDCompleted(object sender, AsyncCompletedEventArgs e)
         {
             if (!Checksumm(updName, updcSum))
                 DownloadUpd(updcSum);
             else
                 addlog.Debug("\"{0}\" успішно завантажено", updName);           
+        }
+*/
+        private void UPDfCompleted(object sender, AsyncCompletedEventArgs e)
+        {               
+            if (!Checksumm(fName, fSum))
+                DownloadFile(fName);
+            else
+                addlog.Debug("Файли успішно завантажено");
         }
 
         public static string GetChecksumm(string filename)
@@ -67,7 +77,7 @@ namespace Mover
             }
         }
 
-        private bool Checksumm(string filename, string summ)
+        private static bool Checksumm(string filename, string summ)
         {
             return GetChecksumm(filename) == (summ).ToUpper() ? true : false;
             /*using (FileStream fs = File.OpenRead(filename))
@@ -80,7 +90,35 @@ namespace Mover
             } */
         }
 
+        public void DownloadFile(string _fName)
+        {
+            try
+            {
+                fName = _fName;
+                XmlDocument doc = new XmlDocument();
+                doc.Load(url + "/version.xml");
 
+                fSum = doc.GetElementsByTagName(fName)[0].InnerText;              
+
+                if (!File.Exists(fName) || !Checksumm(fName, fSum))
+                {
+                    addlog.Debug("Не знайдено \"{0}\", або різні контрольні суми, спроба завантажити із сервера", fName);
+
+                    if (File.Exists(fName)) { File.Delete(fName); }
+
+                    WebClient client = new WebClient();
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(UPDfCompleted);
+                    client.DownloadFileAsync(new Uri(url + "/" + fName+".zip"), fName); //add ".zip" to name in server becose error when *.config
+                }
+
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("Помилка при завантаженні {0}: {1}", fName, ex.Message);
+            }
+
+        }
+/*
         private void DownloadUpd(string updcSum)
         {
             try
@@ -103,41 +141,27 @@ namespace Mover
             }
 
         }
-
+        */
         public void Download()
         {
             try
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(url+"/version.xml");
-               // XmlElement elem = doc.DocumentElement;
 
                 string mVers = doc.GetElementsByTagName("mover")[0].InnerText; 
-               /* foreach (XmlNode node in elem)
-                {
-                    if (node.Name.ToUpper() =="Mover".ToUpper())
-                    {
-                        mVers = node.InnerText;
-                        break; 
-                    }
-                    
-                }
-                */
-               
-
-               // string a = elem..Item(1).InnerText;
 
                 Version remoteVersion = new Version(mVers);
                 Version localVersion = new Version(Application.ProductVersion);
 
                 cSum = doc.GetElementsByTagName("controlSum")[0].InnerText;
-                updcSum = doc.GetElementsByTagName("UPDcontrolSum")[0].InnerText;
+                //updcSum = doc.GetElementsByTagName("UPDcontrolSum")[0].InnerText;
 
 
                 if (localVersion < remoteVersion)
                 {
                     addlog.Info("Знайдено нову версію Mover - \"{0}\"", remoteVersion.ToString());
-                    DownloadUpd(updcSum);
+                    DownloadFile(updName);
 
                     if (File.Exists(new_name)) { File.Delete(new_name); }
 

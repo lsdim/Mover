@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Ionic;
 using Ionic.Zip;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -48,7 +49,49 @@ namespace Mover
 
                 return false;
             }
+
+            public string GetIP()
+            {
+                try
+                {
+                    string rez = "";
+                    // if (TCP)
+                    rez = clear_mask.Substring(2, clear_mask.IndexOf('\\', 2) - 2);
+                    if (IPAddress.TryParse(rez, out IPAddress ip))
+                        return rez;
+                    else
+                        return "";
+                }
+                catch(Exception ex)
+                {
+                    addlog.Error("Помилка при отриманні ІР адреси із шляху: {0}", ex.Message);
+                    return "";
+                }
+
+            }
+
+            public string GetPath()
+            {
+                try
+                {
+                    string rez = "";
+                    //  if (TCP)
+                    rez = clear_mask.Substring(clear_mask.IndexOf('\\', 2) + 1, (clear_mask.Length - clear_mask.IndexOf('\\', 2)-1));
+
+                    return rez;
+                }
+                catch(Exception ex)
+                {
+                    addlog.Error("Помилка при отримані шляху без ІР адреси: {0}",ex.Message);
+                    return "";
+                }
+                
+
+            }
         }
+
+        
+       
 
         /// <summary>
         /// Loging all events
@@ -107,9 +150,7 @@ namespace Mover
 
             if (oper == Operation.Copy || oper == Operation.CopyRepl || oper == Operation.Move || oper == Operation.MoveRepl)
                 dir_destin = (dir_destin[dir_destin.Length-1] == '\\') ? dir_destin : dir_destin + "\\";
-            
 
-            
 
             IEnumerable<string> files = SafeEnumerateFiles(dirs_from, patterns, recur);
                         
@@ -117,7 +158,7 @@ namespace Mover
             {
                 case Operation.Copy:
                     if (elem.TCP)
-                        CopyFileTCP(dir_destin, files, false);
+                        CopyFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
                     else
                         CopyFile(dir_destin, files, false);
                     break;
@@ -723,11 +764,18 @@ namespace Mover
             try
             {
                 Stream rez = new MemoryStream();
-                ZipFile zip = new ZipFile();
-                zip.CompressionLevel = Ionic.Zlib.CompressionLevel.BestCompression;
-                zip.CompressionMethod = CompressionMethod.BZip2;
+                ZipFile zip = new ZipFile(Encoding.UTF8)
+                {
+                    CompressionLevel = Ionic.Zlib.CompressionLevel.BestCompression,
+                    CompressionMethod = CompressionMethod.BZip2
+                };
                 zip.SaveProgress += SaveProgress;
-                zip.AddFiles(files);
+                foreach (string f in files)
+                {
+                    zip.AddFile(f, "");
+                    addlog.Debug("В архів додано файл - {0}", f);
+                }
+                //zip.AddFiles(files);
                 zip.Save(rez);
 
                 return rez;
@@ -746,13 +794,13 @@ namespace Mover
             switch (e.EventType)
             {
                 case ZipProgressEventType.Saving_Started:
-                    addlog.Debug("Початок архівування файлів:");
+                    addlog.Debug("Початок архівування файлів");
                     break;
-                case ZipProgressEventType.Saving_BeforeWriteEntry:
-                    addlog.Debug(e.CurrentEntry.FileName);
-                    break;
+               /* case ZipProgressEventType.Saving_BeforeWriteEntry:
+                    addlog.Debug("{0}, було - {1}, стало - {2}", e.CurrentEntry.FileName, e.CurrentEntry.UncompressedSize, e.CurrentEntry.CompressedSize);
+                    break;*/
                 case ZipProgressEventType.Saving_Completed:
-                    addlog.Debug("Кінець архівування.");
+                    addlog.Debug("Кінець архівування");
                     break;
             }
         }
@@ -760,24 +808,32 @@ namespace Mover
 
         private static void CopyFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
         {
-            Stream strm = ZipingFile(files);
-
-            TcpClient tcpC = new TcpClient(IP, 30001);
-            NetworkStream nts = tcpC.GetStream();
-            BinaryFormatter format = new BinaryFormatter();
-            byte[] buf = new byte[1024];
-            int count;
-            BinaryReader br = new BinaryReader(strm);
-            long k = strm.Length;
-            format.Serialize(nts, k.ToString());
-            format.Serialize(nts, destination);
-            while ((count = br.Read(buf, 0, 1024)) > 0)
+            try
             {
-                format.Serialize(nts, buf);
-            }               
+                Stream fs = ZipingFile(files);
+                fs.Seek(0, SeekOrigin.Begin);
+
+                TcpClient tcpC = new TcpClient(IP, 30001);
+                NetworkStream nts = tcpC.GetStream();
+                BinaryFormatter format = new BinaryFormatter();
+                byte[] buf = new byte[1280];
+                int count;
+                BinaryReader br = new BinaryReader(fs);
+                long k = fs.Length;
+                format.Serialize(nts, k.ToString() + "|" + destination); //Send size and destination
+
+                while ((count = br.Read(buf, 0, 1280)) > 0)
+                {
+                    format.Serialize(nts, buf);                    
+                }
+            }
+            catch(Exception ex)
+            {
+                addlog.Error("При відправці файлів по ТСР виникла помилка: {0}", ex.Message);
+            }
             
 
-            //TODO: TCP send file
+            //TODO: add comment to TCP send file
 
         }
         

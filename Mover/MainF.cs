@@ -13,6 +13,9 @@ using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Net;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
+using Ionic.Zip;
 
 namespace Mover
 {
@@ -61,10 +64,20 @@ namespace Mover
 
             HashConf = GetConfHash();
             //Check Update in host
-            // UpdateApl upd = new Mover.UpdateApl(urlUPD);
+            //TODO: зробити завантаження дллок окремим модулем
+            string[] files = { "NLog.config", "Ionic.Zip.dll", "Mover.XmlSerializers.dll",  "NLog.dll", "NLog.xml" };
+            UpdateApl upd = new Mover.UpdateApl(urlUPD);
+            foreach (string f in files)
+            {
+            //    upd.DownloadFile(f);
+            }
             //  upd.Download();
 
             nI1.Text = "Mover server v." + vers;
+
+            Thread TCPin = new Thread(GetFile);
+            TCPin.IsBackground = true;
+            TCPin.Start();
 
 
 
@@ -440,7 +453,13 @@ namespace Mover
 
                 }
                 if (dlgRez == DialogResult.No)
+                {
                     ReadIni();
+                    BackgroundWorker bgw = new BackgroundWorker();
+                    bgw.DoWork += BGW_GetConfFromServer_DoWork;
+                    bgw.RunWorkerCompleted += BGW_GetConfFromServer_Completed;
+                    bgw.RunWorkerAsync();
+                }
             }
             this.Hide();
             this.WindowState = FormWindowState.Minimized;
@@ -449,13 +468,12 @@ namespace Mover
         public delegate void SaveIni(); // delegat for new Thread for write ini file
         public delegate void SaveServ(); // delegat for new Thread for write into server
         private void WriteInvoke()
-        {
+        {            
             SaveIni dlgtSave = new SaveIni(WriteIni);
             Invoke(dlgtSave);
 
             SaveServ dlgServ = new SaveServ(SaveCfgIntoServer);
             Invoke(dlgServ);
-
         }
 
         /// <summary>
@@ -514,6 +532,12 @@ namespace Mover
         private void bCancel_Click(object sender, EventArgs e)
         {
             ReadIni();
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += BGW_GetConfFromServer_DoWork;
+            bgw.RunWorkerCompleted += BGW_GetConfFromServer_Completed;
+            bgw.RunWorkerAsync();
+
             this.Hide();
             this.WindowState = FormWindowState.Minimized;
         }
@@ -737,6 +761,7 @@ namespace Mover
                 if (int.TryParse(xmldoc.GetElementsByTagName("BALOON")[0].InnerText, out int baloon))
                     chBbaloon.Checked = Convert.ToBoolean(baloon);
 
+                WriteIni();
                 addlog.Info("Успішно отримано конфігурацію \"{0}\" із сервера", confIP);
             }
             catch(Exception ex)
@@ -920,6 +945,69 @@ namespace Mover
             MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Copy);
             mv.Run();
         }
+
+        private void GetFile()
+        {
+            try
+            {
+                TcpListener clientListener = new TcpListener(IPAddress.Any, 30001);
+                clientListener.Start();
+                while (true)
+                {
+                    TcpClient client = clientListener.AcceptTcpClient();
+                    NetworkStream readerStream = client.GetStream();
+                    BinaryFormatter outformat = new BinaryFormatter();
+
+                    string[] lng_pth = outformat.Deserialize(readerStream).ToString().Split('|'); // get length file and path destination
+
+                    Directory.CreateDirectory(lng_pth[1]);
+
+                    string nameFile = Path.Combine(lng_pth[1], client.Client.RemoteEndPoint.ToString().Split(':')[0] + DateTime.Now.ToString("_yyyyMMddHHmmss") + ".zip");
+
+                    FileStream fs = new FileStream(nameFile, FileMode.OpenOrCreate);
+                    BinaryWriter bw = new BinaryWriter(fs);
+
+                    int count;
+                    count = int.Parse(lng_pth[0]);//Получаем размер файла
+
+                    int i = 0;
+                    for (; i < count; i += 1280)//Цикл пока не дойдём до конца файла
+                    {
+
+                        byte[] buf = (byte[])(outformat.Deserialize(readerStream));//Собственно читаем из потока и записываем в файл
+                        bw.Write(buf);
+                    }
+
+                    bw.Close();
+                    fs.Close();
+
+                    addlog.Info("Отримано файл(и) від - {0}", client.Client.RemoteEndPoint.ToString().Split(':')[0]);
+
+                    ZipFile zip =  ZipFile.Read(nameFile);
+                    zip.AlternateEncoding = Encoding.UTF8;
+
+                    zip.ExtractProgress += ExtractProgress;
+
+
+                    zip.ExtractAll(lng_pth[1], ExtractExistingFileAction.OverwriteSilently);
+                    zip.Dispose();
+                    File.Delete(nameFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При отриманні файлів по ТСР виникла помилка: {0}", ex.Message);
+            }
+        }
+
+        private void ExtractProgress(object sender, ExtractProgressEventArgs e)
+        {
+            if (e.EventType == ZipProgressEventType.Extracting_BeforeExtractEntry)
+                addlog.Info("{0}{1}", e.ExtractLocation, e.CurrentEntry.FileName);
+
+        }
+
+
     }
 }
 
