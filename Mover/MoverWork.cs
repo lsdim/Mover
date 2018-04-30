@@ -161,13 +161,13 @@ namespace Mover
             {
                 case Operation.Copy:
                     if (elem.TCP)
-                        SendFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
+                        CopyFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, false);
                     else
                         CopyFile(dir_destin, files, false);
                     break;
                 case Operation.CopyRepl:
                     if (elem.TCP)
-                        SendFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, true);
+                        CopyFileTCP(Mask(dir_destin).GetIP(), Mask(dir_destin).GetPath(), files, true);
                     else
                         CopyFile(dir_destin, files, true);
                     break;
@@ -818,6 +818,21 @@ namespace Mover
             }
         }
 
+        private static void CopyFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
+        {
+            try
+            {
+                if (SendFileTCP(IP, destination, files, owerwrite))
+                {    
+                    addlog.Info("Файли успішно скопійовано");
+                }
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("Помилка при копіювані файлів по ТСР: {0}", ex.Message);
+            }
+        }
+
         private static void MoveFileTCP(string IP, string destination, IEnumerable<string> files, bool owerwrite)
         {
             try
@@ -852,18 +867,24 @@ namespace Mover
                 fs.Seek(0, SeekOrigin.Begin);
 
                 TcpClient tcpC = new TcpClient(IP, 30001);
+                tcpC.SendTimeout=1000;
                 NetworkStream nts = tcpC.GetStream();
                 BinaryFormatter format = new BinaryFormatter();
                 byte[] buf = new byte[1280];
                 int count;
                 BinaryReader br = new BinaryReader(fs);
                 long k = fs.Length;
-                format.Serialize(nts, k.ToString() + "|" + destination + "|" + Convert.ToInt32(owerwrite).ToString()); //Send size and destination
+                format.Serialize(nts, k.ToString() + "|" + destination + "|" + Convert.ToInt32(owerwrite).ToString()+"|"+UpdateApl.GetChecksumm(fs)); //Send size and destination and Check sum
 
+                fs.Seek(0, SeekOrigin.Begin);
+                addlog.Debug("байти пішли");
                 while ((count = br.Read(buf, 0, 1280)) > 0)
                 {
-                    format.Serialize(nts, buf);                    
+                    format.Serialize(nts, buf);
+                    //addlog.Debug("Передано {0} байт", count);
                 }
+
+               // string ok = (string)(format.Deserialize(nts));
 
                 fs.Close();
 
@@ -874,10 +895,7 @@ namespace Mover
             {
                 addlog.Error("При відправці файлів по ТСР виникла помилка: {0}", ex.Message);
                 return false;
-            }
-            
-
-            //TODO: додати функцію для копіювання??
+            }            
 
         }
         

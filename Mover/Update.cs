@@ -77,6 +77,18 @@ namespace Mover
             }
         }
 
+        public static string GetChecksumm(Stream fs)
+        {
+            /*using (FileStream fs = File.OpenRead(filename))
+            {*/
+                System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+                byte[] fileData = new byte[fs.Length];
+                fs.Read(fileData, 0, (int)fs.Length);
+                byte[] checkSumm = md5.ComputeHash(fileData);
+                return BitConverter.ToString(checkSumm).Replace("-", String.Empty);
+            //}
+        }
+
         private static bool Checksumm(string filename, string summ)
         {
             return GetChecksumm(filename) == (summ).ToUpper() ? true : false;

@@ -942,7 +942,7 @@ namespace Mover
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Move);
+            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Copy);
             mv.Run();
         }
 
@@ -955,9 +955,11 @@ namespace Mover
                 while (true)
                 {
                     TcpClient client = clientListener.AcceptTcpClient();
+                    client.ReceiveTimeout = 1000;
                     NetworkStream readerStream = client.GetStream();
                     BinaryFormatter outformat = new BinaryFormatter();
 
+                    addlog.Info("початок приймання файлів по ТСР");
                     string[] lng_pth = outformat.Deserialize(readerStream).ToString().Split('|'); // get length file and path destination
 
                     Directory.CreateDirectory(lng_pth[1]);
@@ -966,43 +968,72 @@ namespace Mover
 
                     FileStream fs = new FileStream(nameFile, FileMode.OpenOrCreate);
                     BinaryWriter bw = new BinaryWriter(fs);
-
-                    int count;
-                    count = int.Parse(lng_pth[0]);//Получаем размер файла
-
-                    int i = 0;
-                    for (; i < count; i += 1280)//Цикл пока не дойдём до конца файла
+                    try
                     {
+                        int count;
+                        count = int.Parse(lng_pth[0]);//Получаем размер файла
 
-                        byte[] buf = (byte[])(outformat.Deserialize(readerStream));//Собственно читаем из потока и записываем в файл
-                        bw.Write(buf);
+                        int i = 0;
+                        for (; i < count; i += 1280)//Цикл пока не дойдём до конца файла
+                        {
+
+                            byte[] buf = (byte[])(outformat.Deserialize(readerStream));//Собственно читаем из потока и записываем в файл
+                            bw.Write(buf);
+                        }
+
+                        /*
+                        fs.Seek(0, SeekOrigin.Begin);
+                        //Check check Sum File
+                        string sum = UpdateApl.GetChecksumm(fs);
+                        if (lng_pth[3] == sum)
+                            outformat.Serialize(readerStream, "OK");
+                        else
+                        {
+                            outformat.Serialize(readerStream, "-1");
+                        }
+*/
+                        addlog.Info("Отримано файл(и) від - {0}", client.Client.RemoteEndPoint.ToString().Split(':')[0]);
+
+                        ExtractExistingFileAction owerwrite;
+                        if (lng_pth[2] == "1")
+                            owerwrite = ExtractExistingFileAction.OverwriteSilently;
+                        else
+                            owerwrite = ExtractExistingFileAction.DoNotOverwrite;
+
+
+
+                        ExtractZip(nameFile, owerwrite);//Extract responsed zip file
+
                     }
+                    catch (Exception ex)
+                    {
+                        addlog.Error("При отриманні файлів виникла помилка: {0}", ex.Message);
+                    }
+                    finally
+                    {
+                        bw.Close();
+                        fs.Close();
+                        File.Delete(nameFile);
+                    }
+                    
 
-                    bw.Close();
-                    fs.Close();
-
-                    addlog.Info("Отримано файл(и) від - {0}", client.Client.RemoteEndPoint.ToString().Split(':')[0]);
-
-                    ZipFile zip =  ZipFile.Read(nameFile);
-                    zip.AlternateEncoding = Encoding.UTF8;
-
-                    zip.ExtractProgress += ExtractProgress;
-
-                    ExtractExistingFileAction owerwrite;
-                    if (lng_pth[2] == "1")
-                        owerwrite = ExtractExistingFileAction.OverwriteSilently;
-                    else
-                        owerwrite = ExtractExistingFileAction.DoNotOverwrite;
-
-                    zip.ExtractAll(lng_pth[1], owerwrite);
-                    zip.Dispose();
-                    File.Delete(nameFile);
                 }
             }
             catch (Exception ex)
             {
                 addlog.Error("При отриманні файлів по ТСР виникла помилка: {0}", ex.Message);
             }
+        }
+
+        private void ExtractZip(string nameFile, ExtractExistingFileAction owerwrite)
+        {
+            ZipFile zip = ZipFile.Read(nameFile);
+            zip.AlternateEncoding = Encoding.UTF8;
+
+            zip.ExtractProgress += ExtractProgress;           
+
+            zip.ExtractAll(Path.GetDirectoryName(nameFile), owerwrite);
+            zip.Dispose();            
         }
 
         private void ExtractProgress(object sender, ExtractProgressEventArgs e)
