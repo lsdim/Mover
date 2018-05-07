@@ -22,7 +22,7 @@ namespace Mover
     public partial class MainF : Form
     {
         public string vers = new Version(Application.ProductVersion).ToString();
-        private static Log addlog = new Log();
+        private static Log addlog;// = new Log();
         private string urlUPD = "";
         private string confIP;
         public string IP;
@@ -38,49 +38,81 @@ namespace Mover
             return nI1;
         }
 
+        private void GetDlls()
+        {
+            //TODO : dll
+
+            try
+            {
+                IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
+
+                urlUPD = ini.ReadString("UPD", "source", "");
+                if (urlUPD == "")
+                {
+                    ini.WriteString("UPD", "source", "http://10.202.14.15/mover/");
+                    urlUPD = "http://10.202.14.15/mover/";
+                }
+
+                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll", "Mover.XmlSerializers.dll" };
+                UpdateApl upd = new Mover.UpdateApl(urlUPD, false);
+                upd.DownloadSystemFile(files);
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+        }
 
 
         private void MainF_Load(object sender, EventArgs e)
         {
-            addlog.Info("**--**--**Mover v{0}**--**--**", vers);
-            addlog.Info("**--**--**Mover v{0}**--**--**", UpdateApl.GetChecksumm(Application.ExecutablePath));
-            addlog.Info("***Програму запущенно {0}***", Application.ExecutablePath);
-
-
-            MoverWeb.MoverServ ms = new MoverWeb.MoverServ();
-
-            string guid = Marshal.GetTypeLibGuidForAssembly(Assembly.GetExecutingAssembly()).ToString();
-
-            Mutex mutexObj = new Mutex(true, guid, out bool existed);
-
-            if (!existed)
+            try
             {
-                addlog.Info(String.Format("Спроба подвійного запуску", vers));
-                Process.GetCurrentProcess().Kill();
+                GetDlls();
+
+                addlog = new Log();
+
+                addlog.Info("**--**--**Mover v{0}**--**--**", vers);
+                addlog.Info("**--**--**Mover v{0}**--**--**", UpdateApl.GetChecksumm(Application.ExecutablePath));
+                addlog.Info("***Програму запущенно {0}***", Application.ExecutablePath);
+
+
+                //  MoverWeb.MoverServ ms = new MoverWeb.MoverServ();
+
+                string guid = Marshal.GetTypeLibGuidForAssembly(Assembly.GetExecutingAssembly()).ToString();
+
+                Mutex mutexObj = new Mutex(true, guid, out bool existed);
+
+                if (!existed)
+                {
+                    addlog.Info(String.Format("Спроба подвійного запуску", vers));
+                    Process.GetCurrentProcess().Kill();
+                }
+
+                GetLocalIP();
+                ReadIni();
+
+                HashConf = GetConfHash();
+
+                // Check and Get New version from server
+                UpdateApl upd = new UpdateApl(urlUPD);
+                upd.Download();
+
+                nI1.Text = "Mover server v." + vers;
+
+                Thread TCPin = new Thread(GetFile)
+                {
+                    IsBackground = true
+                };
+                TCPin.Start();
+
             }
-
-            GetLocalIP();
-            ReadIni();
-
-            HashConf = GetConfHash();
-            //Check Update in host
-            //TODO: зробити завантаження дллок окремим модулем
-            string[] files = { "NLog.config", "Ionic.Zip.dll", "Mover.XmlSerializers.dll",  "NLog.dll", "NLog.xml" };
-            UpdateApl upd = new Mover.UpdateApl(urlUPD);
-            foreach (string f in files)
+            catch(Exception ex)
             {
-            //    upd.DownloadFile(f);
+                addlog.Error("При запуску Мвера виникла помилка: {0}", ex.Message);
             }
-            //  upd.Download();
-
-            nI1.Text = "Mover server v." + vers;
-
-            Thread TCPin = new Thread(GetFile);
-            TCPin.IsBackground = true;
-            TCPin.Start();
-
-
-
+            
         }
 
         private void GetLocalIP()

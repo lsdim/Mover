@@ -8,7 +8,7 @@ namespace Mover
 {
     class Log
     {
-        private static NLog.Logger addlog = NLog.LogManager.GetCurrentClassLogger();
+        private static NLog.Logger addlog;// = NLog.LogManager.GetCurrentClassLogger();
 
         private Version vers;
 
@@ -19,7 +19,15 @@ namespace Mover
 
         public Log()
         {
-            vers = new Version(Application.ProductVersion);
+            try
+            {
+                vers = new Version(Application.ProductVersion);
+                addlog = NLog.LogManager.GetCurrentClassLogger();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void Info(string message)

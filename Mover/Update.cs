@@ -21,26 +21,34 @@ namespace Mover
         private string fName = "";
 
 
-        private static Log addlog = new Log();
+        private static Log addlog;// = new Log();
 
-        public UpdateApl(string _url)
+      /*  public UpdateApl(string _url)
         {
             url = _url;
+            addlog = new Log();
         }
-                
+        */
+        public UpdateApl(string _url, bool log=true)
+        {
+                url = _url;
+                if (log) addlog = new Log();
+        }
 
-        private void Completed(object sender, AsyncCompletedEventArgs e)
+
+        //private void Completed(object sender, AsyncCompletedEventArgs e)
+        private void Completed()
         {
             if (Checksumm(new_name, cSum))
             {
                 try
                 {
-                    Process.Start(updName, new_name + " " + Path.GetFileName(nameFile));
+                    Process.Start(updName, Path.GetFileName(nameFile)+ " " + new_name);
                     Process.GetCurrentProcess().Kill();
                 }
                 catch (Exception ex)
                 {
-                    addlog.Debug(ex.Message);
+                    if (addlog!=null) addlog.Debug(ex.Message);
                 }
             }
             else
@@ -62,7 +70,17 @@ namespace Mover
             if (!Checksumm(fName, fSum))
                 DownloadFile(fName);
             else
-                addlog.Debug("Файли успішно завантажено");
+                if (addlog != null) addlog.Debug("Файли успішно завантажено");
+        }
+
+        private void UPDfCompleted()
+        {
+            if (!Checksumm(fName, fSum))
+                DownloadFile(fName);
+            else
+            {
+                if (addlog != null) addlog.Debug("Файли успішно завантажено");                
+            }
         }
 
         public static string GetChecksumm(string filename)
@@ -102,10 +120,26 @@ namespace Mover
             } */
         }
 
-        public void DownloadFile(string _fName)
+        public void DownloadSystemFile(string[] files)
+        {
+            DownloadFile(updName);             
+            foreach (string f in files)
+            {
+                if (DownloadFile(f))
+                {
+                    Process.Start(updName, Path.GetFileName(nameFile));
+                    Process.GetCurrentProcess().Kill();
+                }
+            }
+
+
+        }
+
+        public bool DownloadFile(string _fName)
         {
             try
             {
+                bool rez = false;
                 fName = _fName;
                 XmlDocument doc = new XmlDocument();
                 doc.Load(url + "/version.xml");
@@ -114,19 +148,26 @@ namespace Mover
 
                 if (!File.Exists(fName) || !Checksumm(fName, fSum))
                 {
-                    addlog.Debug("Не знайдено \"{0}\", або різні контрольні суми, спроба завантажити із сервера", fName);
+                    if (addlog != null) addlog.Debug("Не знайдено \"{0}\", або різні контрольні суми, спроба завантажити із сервера", fName);
 
                     if (File.Exists(fName)) { File.Delete(fName); }
 
                     WebClient client = new WebClient();
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(UPDfCompleted);
-                    client.DownloadFileAsync(new Uri(url + "/" + fName+".zip"), fName); //add ".zip" to name in server becose error when *.config
+                    client.DownloadFile/*Async*/(new Uri(url + "/" + fName+".zip"), fName); //add ".zip" to name in server becose error when *.config
+                    UPDfCompleted();
+
+                    client.Dispose();
+                    rez = true;
                 }
+
+                return rez;
 
             }
             catch (Exception ex)
             {
-                addlog.Error("Помилка при завантаженні {0}: {1}", fName, ex.Message);
+                if (addlog != null) addlog.Error("Помилка при завантаженні {0}: {1}", fName, ex.Message);
+                return false;
             }
 
         }
@@ -172,22 +213,23 @@ namespace Mover
 
                 if (localVersion < remoteVersion)
                 {
-                    addlog.Info("Знайдено нову версію Mover - \"{0}\"", remoteVersion.ToString());
+                    if (addlog != null) addlog.Info("Знайдено нову версію Mover - \"{0}\"", remoteVersion.ToString());
                     DownloadFile(updName);
 
                     if (File.Exists(new_name)) { File.Delete(new_name); }
 
                     WebClient client = new WebClient();
                     //client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
-                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
-                    client.DownloadFileAsync(new Uri(url + "/mover.exe"), new_name);
+                    //client.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
+                    client.DownloadFile/*Async*/(new Uri(url + "/mover.exe"), new_name);
+                    Completed();
                 }
                 else
-                    addlog.Info("Версія програми актуальна");
+                    if (addlog != null) addlog.Info("Версія програми актуальна");
             }
             catch (Exception ex)
             {
-                addlog.Error("Помилка при завантаженні оновлення: {0}", ex.Message);
+                if (addlog != null) addlog.Error("Помилка при завантаженні оновлення: {0}", ex.Message);
             }
         }
     }
