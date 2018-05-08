@@ -40,6 +40,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.CloseTSMI = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.button1 = new System.Windows.Forms.Button();
             this.chBbaloon = new System.Windows.Forms.CheckBox();
             this.bRem1 = new System.Windows.Forms.Button();
             this.bAdd1 = new System.Windows.Forms.Button();
@@ -63,7 +64,6 @@
             this.GV2 = new System.Windows.Forms.DataGridView();
             this.PathScan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.button1 = new System.Windows.Forms.Button();
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -157,6 +157,16 @@
             this.splitContainer1.Size = new System.Drawing.Size(500, 391);
             this.splitContainer1.SplitterDistance = 210;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(413, 179);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // chBbaloon
             // 
@@ -320,6 +330,7 @@
             this.chBAutoRun.TabIndex = 7;
             this.chBAutoRun.Text = "Автозапуск";
             this.chBAutoRun.UseVisualStyleBackColor = true;
+            this.chBAutoRun.CheckedChanged += new System.EventHandler(this.chBAutoRun_CheckedChanged);
             // 
             // cBconf
             // 
@@ -433,16 +444,6 @@
             this.Browse.Text = "...";
             this.Browse.ToolTipText = "Обрати папку";
             this.Browse.Width = 50;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(413, 179);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // MainF
             // 

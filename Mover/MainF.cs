@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using Ionic.Zip;
+using IWshRuntimeLibrary;
 
 namespace Mover
 {
@@ -37,11 +38,12 @@ namespace Mover
         {
             return nI1;
         }
-
+        
+        /// <summary>
+        /// Download dlls for work
+        /// </summary>
         private void GetDlls()
         {
-            //TODO : dll
-
             try
             {
                 IniFiles ini = new IniFiles(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Properties.ini"));
@@ -53,7 +55,7 @@ namespace Mover
                     urlUPD = "http://10.202.14.15/mover/";
                 }
 
-                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll", "Mover.XmlSerializers.dll" };
+                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll" };//, "Mover.XmlSerializers.dll" };
                 UpdateApl upd = new Mover.UpdateApl(urlUPD, false);
                 upd.DownloadSystemFile(files);
             }
@@ -1045,7 +1047,7 @@ namespace Mover
                     {
                         bw.Close();
                         fs.Close();
-                        File.Delete(nameFile);
+                        System.IO.File.Delete(nameFile);
                     }
                     
 
@@ -1075,7 +1077,18 @@ namespace Mover
 
         }
 
-
+        private void chBAutoRun_CheckedChanged(object sender, EventArgs e)
+        {
+            //TODO : Craete and delete shortcut
+            object startup = (object)"Startup";
+            
+            WshShell shell = new WshShell();
+            string adr = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\movertest.lnk";//shell.SpecialFolders.Item(ref startup) + "movertest.lnk";
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(adr);
+            shortcut.Description = "test";
+            shortcut.TargetPath = Application.ExecutablePath;
+            shortcut.Save();
+        }
     }
 }
 

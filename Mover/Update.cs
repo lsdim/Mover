@@ -122,14 +122,19 @@ namespace Mover
 
         public void DownloadSystemFile(string[] files)
         {
+            bool restart = false;
+
             DownloadFile(updName);             
             foreach (string f in files)
             {
-                if (DownloadFile(f))
-                {
-                    Process.Start(updName, Path.GetFileName(nameFile));
-                    Process.GetCurrentProcess().Kill();
-                }
+                restart = DownloadFile(f);
+               
+            }
+
+            if (restart)
+            {
+                Process.Start(updName, Path.GetFileName(nameFile));
+                Process.GetCurrentProcess().Kill();
             }
 
 
