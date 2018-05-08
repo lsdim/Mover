@@ -71,7 +71,7 @@ namespace Mover
         {
             try
             {
-                GetDlls();
+                //GetDlls();
 
                 addlog = new Log();
 
@@ -95,11 +95,14 @@ namespace Mover
                 GetLocalIP();
                 ReadIni();
 
-                HashConf = GetConfHash();
+                chBAutoRun.Checked = System.IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ".lnk"); 
+
+                    //get hash sum config
+                    HashConf = GetConfHash();
 
                 // Check and Get New version from server
                 UpdateApl upd = new UpdateApl(urlUPD);
-                upd.Download();
+                //upd.Download();
 
                 nI1.Text = "Mover server v." + vers;
 
@@ -1079,15 +1082,47 @@ namespace Mover
 
         private void chBAutoRun_CheckedChanged(object sender, EventArgs e)
         {
-            //TODO : Craete and delete shortcut
-            object startup = (object)"Startup";
-            
-            WshShell shell = new WshShell();
-            string adr = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\movertest.lnk";//shell.SpecialFolders.Item(ref startup) + "movertest.lnk";
-            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(adr);
-            shortcut.Description = "test";
-            shortcut.TargetPath = Application.ExecutablePath;
-            shortcut.Save();
+            try
+            {
+                string fname = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ".lnk";
+                if (chBAutoRun.Checked)
+                {
+                    if (!System.IO.File.Exists(fname))
+                    {
+                        CreateShortCut();
+                        addlog.Info("Додано ярлик в автозавантаження");
+                    }
+                }
+                else
+                {
+                    if (System.IO.File.Exists(fname))
+                    {
+                        System.IO.File.Delete(fname);
+                        addlog.Info("Видалено ярлик з автозавантаження");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При створенні або видалені ярлика виникла помилка: {0}", ex.Message);
+            }
+        }
+
+        private void CreateShortCut()
+        {
+            try
+            {
+                WshShell shell = new WshShell();
+                string adr = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ".lnk";//shell.SpecialFolders.Item(ref startup) + "movertest.lnk";
+                IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(adr);
+                shortcut.Description = "Mover";
+                shortcut.TargetPath = Application.ExecutablePath;
+                shortcut.Save();
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При створені архіву виникла помилка: {0}", ex.Message);
+            }
         }
     }
 }
