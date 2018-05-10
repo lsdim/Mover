@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainF));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.nI1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.cMS1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.SettingTSMI = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,6 +51,9 @@
             this.Place = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Mask = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Stan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cMS2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.копіюватиПісляЕлементаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.копіюватиВКінецьСпискуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bRemConf = new System.Windows.Forms.Button();
             this.bAddConf = new System.Windows.Forms.Button();
             this.chBAutoRun = new System.Windows.Forms.CheckBox();
@@ -64,6 +67,8 @@
             this.GV2 = new System.Windows.Forms.DataGridView();
             this.PathScan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.prB1 = new System.Windows.Forms.ProgressBar();
+            this.tMotor = new System.Windows.Forms.Timer(this.components);
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -71,6 +76,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.Sec)).BeginInit();
             this.p1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GV1)).BeginInit();
+            this.cMS2.SuspendLayout();
             this.p2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GV2)).BeginInit();
             this.SuspendLayout();
@@ -141,6 +147,7 @@
             this.splitContainer1.Panel1.Controls.Add(this.bAdd1);
             this.splitContainer1.Panel1.Controls.Add(this.Sec);
             this.splitContainer1.Panel1.Controls.Add(this.p1);
+            this.splitContainer1.Panel1.Controls.Add(this.prB1);
             // 
             // splitContainer1.Panel2
             // 
@@ -160,6 +167,7 @@
             // 
             // button1
             // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.Location = new System.Drawing.Point(413, 179);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
@@ -246,18 +254,19 @@
             // GV1
             // 
             this.GV1.AllowUserToAddRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.GV1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.GV1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.GV1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.DirList,
             this.Place,
             this.Mask,
             this.Stan});
+            this.GV1.ContextMenuStrip = this.cMS2;
             this.GV1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GV1.Location = new System.Drawing.Point(0, 0);
             this.GV1.MultiSelect = false;
@@ -266,6 +275,7 @@
             this.GV1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.GV1.Size = new System.Drawing.Size(494, 170);
             this.GV1.TabIndex = 0;
+            this.GV1.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.GV1_CellMouseEnter);
             this.GV1.DoubleClick += new System.EventHandler(this.GV1_DoubleClick);
             // 
             // DirList
@@ -276,8 +286,8 @@
             // 
             // Place
             // 
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.Place.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Place.DefaultCellStyle = dataGridViewCellStyle4;
             this.Place.FillWeight = 200F;
             this.Place.HeaderText = "Місце призначення";
             this.Place.Name = "Place";
@@ -293,6 +303,28 @@
             this.Stan.HeaderText = "Стан";
             this.Stan.Name = "Stan";
             this.Stan.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // cMS2
+            // 
+            this.cMS2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.копіюватиПісляЕлементаToolStripMenuItem,
+            this.копіюватиВКінецьСпискуToolStripMenuItem});
+            this.cMS2.Name = "cMS2";
+            this.cMS2.Size = new System.Drawing.Size(221, 48);
+            // 
+            // копіюватиПісляЕлементаToolStripMenuItem
+            // 
+            this.копіюватиПісляЕлементаToolStripMenuItem.Name = "копіюватиПісляЕлементаToolStripMenuItem";
+            this.копіюватиПісляЕлементаToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.копіюватиПісляЕлементаToolStripMenuItem.Text = "Копіювати після елемента";
+            this.копіюватиПісляЕлементаToolStripMenuItem.Click += new System.EventHandler(this.CopyNext_ToolStripMenuItem_Click);
+            // 
+            // копіюватиВКінецьСпискуToolStripMenuItem
+            // 
+            this.копіюватиВКінецьСпискуToolStripMenuItem.Name = "копіюватиВКінецьСпискуToolStripMenuItem";
+            this.копіюватиВКінецьСпискуToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.копіюватиВКінецьСпискуToolStripMenuItem.Text = "Копіювати в кінець списку";
+            this.копіюватиВКінецьСпискуToolStripMenuItem.Click += new System.EventHandler(this.CopyEnd_ToolStripMenuItem_Click);
             // 
             // bRemConf
             // 
@@ -445,6 +477,22 @@
             this.Browse.ToolTipText = "Обрати папку";
             this.Browse.Width = 50;
             // 
+            // prB1
+            // 
+            this.prB1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.prB1.Location = new System.Drawing.Point(4, 176);
+            this.prB1.Name = "prB1";
+            this.prB1.Size = new System.Drawing.Size(492, 29);
+            this.prB1.TabIndex = 11;
+            this.prB1.UseWaitCursor = true;
+            this.prB1.Visible = false;
+            // 
+            // tMotor
+            // 
+            this.tMotor.Interval = 10000;
+            this.tMotor.Tick += new System.EventHandler(this.tMotor_Tick);
+            // 
             // MainF
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -467,6 +515,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.Sec)).EndInit();
             this.p1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GV1)).EndInit();
+            this.cMS2.ResumeLayout(false);
             this.p2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GV2)).EndInit();
             this.ResumeLayout(false);
@@ -506,6 +555,11 @@
         private System.Windows.Forms.ComboBox cBconf;
         private System.Windows.Forms.CheckBox chBconf;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ContextMenuStrip cMS2;
+        private System.Windows.Forms.ToolStripMenuItem копіюватиПісляЕлементаToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem копіюватиВКінецьСпискуToolStripMenuItem;
+        private System.Windows.Forms.ProgressBar prB1;
+        private System.Windows.Forms.Timer tMotor;
     }
 }
 

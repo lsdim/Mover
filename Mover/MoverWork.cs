@@ -230,7 +230,7 @@ namespace Mover
             }
             catch (Exception ex)
             {
-                addlog.Error("При копіюванні виникла помилка: \"{0}\"", ex.Message);//error CreaTE dIRECTORY
+                addlog.Error("При копіюванні до \"{0}\" виникла помилка: {0}", dectination, ex.Message);//error CreaTE dIRECTORY                
             }
         }
 
@@ -259,13 +259,13 @@ namespace Mover
                     
                     catch (Exception ex)
                     {
-                        addlog.Error("При переміщені файлу \"{0}\" виникла помилка: \"{1}\"", f,ex.Message);
+                        addlog.Error("При переміщені файлу \"{0}\" виникла помилка: {1}", f,ex.Message);
                     }
                 }
             }
             catch (Exception ex)
             {
-                addlog.Error("При переміщені виникла помилка: \"{0}\"", ex.Message);//error CreaTE dIRECTORY
+                addlog.Error("При переміщені до \"{0}\" виникла помилка: {1}", dectination, ex.Message);//error CreaTE dIRECTORY
             }
         }
 

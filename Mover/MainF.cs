@@ -29,6 +29,8 @@ namespace Mover
         public string IP;
         public string HashConf;
 
+        System.Drawing.Point p = new Point();
+
         public MainF()
         {
             InitializeComponent();
@@ -111,6 +113,11 @@ namespace Mover
                     IsBackground = true
                 };
                 TCPin.Start();
+
+                //start Timer for main work
+                tMotor.Interval = (int)Sec.Value * 1000;
+                tMotor.Enabled = true;
+
 
             }
             catch(Exception ex)
@@ -196,6 +203,7 @@ namespace Mover
             //  GV2.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;// .AutoResizeColumns();
 
             Sec.Value = ini.ReadInteger("TIME", "sek", 100);
+
             confIP = ini.ReadString("MOOOVER", "IP", "0.0.0.0");
 
             if (confIP == "0.0.0.0")
@@ -432,8 +440,10 @@ namespace Mover
 
         private void SettingTSMI_Click(object sender, EventArgs e)
         {
-            this.Show();
+            NormalMainForm();
+            /*this.Show();
             this.WindowState = FormWindowState.Normal;
+            tMotor.Enabled = false;*/
         }
 
 
@@ -447,11 +457,16 @@ namespace Mover
             }
             else
             {
-                this.Show();
-                this.WindowState = FormWindowState.Normal;
-                HashConf = GetConfHash();
-
+                NormalMainForm();
             }
+        }
+
+        private void NormalMainForm()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            HashConf = GetConfHash();
+            tMotor.Enabled = false;
         }
 
         private void MainF_FormClosing(object sender, FormClosingEventArgs e)
@@ -498,8 +513,11 @@ namespace Mover
                     bgw.RunWorkerAsync();
                 }
             }
+
             this.Hide();
             this.WindowState = FormWindowState.Minimized;
+            tMotor.Interval = (int)Sec.Value * 1000;
+            tMotor.Enabled = true;
         }
 
         public delegate void SaveIni(); // delegat for new Thread for write ini file
@@ -979,8 +997,9 @@ namespace Mover
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), MoverWork.Operation.Copy);
-            mv.Run();
+            //MoverWork mv = new MoverWork(GV2[0, 0].Value.ToString(), GV1[1, 0].Value.ToString(), GV1[2, 0].Value.ToString(), (MoverWork.Operation)6);
+            //mv.Run();
+            Motor();
         }
 
         private void GetFile()
@@ -1123,6 +1142,169 @@ namespace Mover
             {
                 addlog.Error("При створені архіву виникла помилка: {0}", ex.Message);
             }
+        }
+
+        private void GV1_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            p.Y = e.RowIndex;
+            p.X = e.ColumnIndex;
+        }
+
+        private void CopyNext_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                GV1.Rows.Insert(p.Y + 1, GV1.Rows[p.Y].Cells[0].Value, GV1.Rows[p.Y].Cells[1].Value, GV1.Rows[p.Y].Cells[2].Value, GV1.Rows[p.Y].Cells[3].Value);
+                GV1.CurrentCell = GV1.Rows[p.Y + 1].Cells[0];
+                for (int i = p.Y; i < GV1.RowCount; i++)
+                    GV1.Rows[i].HeaderCell.Value = (i + 1).ToString();
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При копіюванні рядка виникла помилка: {0}", ex.Message);
+            }
+        }
+
+        private void CopyEnd_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                GV1.Rows.Add(GV1.Rows[p.Y].Cells[0].Value, GV1.Rows[p.Y].Cells[1].Value, GV1.Rows[p.Y].Cells[2].Value, GV1.Rows[p.Y].Cells[3].Value);
+                GV1.Rows[GV1.Rows.Count - 1].HeaderCell.Value = GV1.Rows.Count.ToString();
+                GV1.CurrentCell = GV1.Rows[GV1.Rows.Count - 1].Cells[0];
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При копіюванні рядка виникла помилка: {0}", ex.Message);
+            }
+        }
+
+        private void Motor()
+        {
+            try
+            {
+                List<string> conf = new List<string>();
+                foreach (DataGridViewRow row in GV1.Rows)
+                {
+                    string tmp = "";
+
+                    if (row.Cells[3].Value.ToString() != "0")
+                    {
+
+                        string[] dir = row.Cells[0].Value.ToString().Split(',');
+                        foreach (string d in dir)
+                        {
+                            if (int.Parse(d.Trim()) != 0)
+                            {
+                                if (tmp == "")
+                                    tmp = GV2.Rows[int.Parse(d.Trim()) - 1].Cells[0].Value.ToString();
+                                else
+                                    tmp += "|" + GV2.Rows[int.Parse(d.Trim()) - 1].Cells[0].Value.ToString();
+                            }
+                        }
+
+                        if (tmp != "")
+                        {
+                            for (int i = 1; i < 4; i++)
+                                tmp += "§" + row.Cells[i].Value.ToString(); //ALT+789
+
+                            conf.Add(tmp);
+                        }
+                    }
+                }
+
+                prB1.Visible = true;
+                prB1.Maximum = conf.Count;
+
+                foreach (Control cntrl in this.Controls)
+                {
+                    cntrl.Enabled = false;
+                }
+
+
+                BackgroundWorker bgw = new BackgroundWorker();
+                bgw.WorkerReportsProgress = true;
+                bgw.ProgressChanged += Bgw_Motor_ProgressChanged;
+                bgw.DoWork += BGW_Motor_DoWork;
+                bgw.RunWorkerCompleted += Bgw_Motor_RunWorkerCompleted;
+                bgw.RunWorkerAsync(conf);
+
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При роботі виникла помилка: {0}", ex.Message);
+            }
+
+
+        }
+
+        private void Bgw_Motor_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            try
+            {
+                prB1.Value = 0;
+                prB1.Visible = false;
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При завершені роботи виникла помилка: {0}", ex.Message);
+            }
+            finally
+            {
+                foreach (Control cntrl in this.Controls)
+                {
+                    cntrl.Enabled = true;
+                }
+            }
+        }
+
+        private void Bgw_Motor_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            try
+            {
+                prB1.Value = e.ProgressPercentage;
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При зміні значення прогресу виконання виникла помилка: {0}", ex.Message);
+            }
+        }
+
+        private void BGW_Motor_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                BackgroundWorker bgw = sender as BackgroundWorker;
+                List<string> rows = (List<string>)e.Argument;
+
+                //int step = 100 / rows.Count;
+                int i = 1;
+                foreach (string row in rows)
+                {
+                    string[] conf = row.Split('§'); //alt+789;
+
+                    MoverWork mw = new MoverWork(conf[0], conf[1], conf[2], (MoverWork.Operation)int.Parse(conf[3]));
+                    mw.Run();                    
+
+                    bgw.ReportProgress(i);
+                    i++;
+                }
+
+                //bgw.ReportProgress(100);
+
+            }
+            catch (Exception ex)
+            {
+                addlog.Error("При роботі в потоці виникла помилка: {0}", ex.Message);
+            }
+
+
+
+        }
+
+        private void tMotor_Tick(object sender, EventArgs e)
+        {
+            Motor();
         }
     }
 }
