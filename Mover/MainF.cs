@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,6 +11,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -57,7 +57,7 @@ namespace Mover
                     urlUPD = "http://10.202.14.15/mover/";
                 }
 
-                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll" };//, "Mover.XmlSerializers.dll" };
+                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll", "System.Core.dll"/*, "System.Xml.dll", "System.Xml.Linq.dll"*/ };//, "Mover.XmlSerializers.dll" };
                 UpdateApl upd = new Mover.UpdateApl(urlUPD, false);
                 upd.DownloadSystemFile(files);
             }
@@ -73,7 +73,7 @@ namespace Mover
         {
             try
             {
-                //GetDlls();
+                GetDlls();
 
                 addlog = new Log();
 
@@ -104,7 +104,7 @@ namespace Mover
 
                 // Check and Get New version from server
                 UpdateApl upd = new UpdateApl(urlUPD);
-                //upd.Download();
+                upd.Download();
 
                 nI1.Text = "Mover server v." + vers;
 
@@ -249,7 +249,7 @@ namespace Mover
                 FolderBrowserDialog fbd = new FolderBrowserDialog();
                 fbd.ShowNewFolderButton = true;
                 fbd.Description = "Оберіть папку для скнування:";
-                fbd.SelectedPath = (String)GV2[1, RowIndex].Value;
+                fbd.SelectedPath = MoverWork.Mask((String)GV2[0, RowIndex].Value).clear_mask;
                 DialogResult dr = fbd.ShowDialog();
                 if (dr == DialogResult.OK)
                 {
@@ -1011,7 +1011,7 @@ namespace Mover
                 while (true)
                 {
                     TcpClient client = clientListener.AcceptTcpClient();
-                    client.ReceiveTimeout = 1000;
+                   // client.ReceiveTimeout = 1000;
                     NetworkStream readerStream = client.GetStream();
                     BinaryFormatter outformat = new BinaryFormatter();
 
@@ -1029,10 +1029,9 @@ namespace Mover
                         int count;
                         count = int.Parse(lng_pth[0]);//Получаем размер файла
 
-                        int i = 0;
-                        for (; i < count; i += 1280)//Цикл пока не дойдём до конца файла
+                        
+                        for (int i = 0; i < count; i += 1280)//Цикл пока не дойдём до конца файла
                         {
-
                             byte[] buf = (byte[])(outformat.Deserialize(readerStream));//Собственно читаем из потока и записываем в файл
                             bw.Write(buf);
                         }
@@ -1048,6 +1047,8 @@ namespace Mover
                             outformat.Serialize(readerStream, "-1");
                         }
 */
+                      //  outformat.Serialize(readerStream, "OK");
+
                         addlog.Info("Отримано файл(и) від - {0}", client.Client.RemoteEndPoint.ToString().Split(':')[0]);
 
                         ExtractExistingFileAction owerwrite;
@@ -1057,7 +1058,7 @@ namespace Mover
                             owerwrite = ExtractExistingFileAction.DoNotOverwrite;
 
 
-
+                        fs.Close();
                         ExtractZip(nameFile, owerwrite);//Extract responsed zip file
 
                     }
@@ -1283,7 +1284,7 @@ namespace Mover
                 {
                     string[] conf = row.Split('§'); //alt+789;
 
-                    MoverWork mw = new MoverWork(conf[0], conf[1], conf[2], (MoverWork.Operation)int.Parse(conf[3]));
+                    MoverWork mw = new MoverWork(conf[0], conf[1], conf[2], (MoverWork.Operation)int.Parse(conf[3].Replace(".","")));
                     mw.Run();                    
 
                     bgw.ReportProgress(i);

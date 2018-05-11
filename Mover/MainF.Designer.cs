@@ -40,6 +40,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.CloseTSMI = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.prB1 = new System.Windows.Forms.ProgressBar();
             this.button1 = new System.Windows.Forms.Button();
             this.chBbaloon = new System.Windows.Forms.CheckBox();
             this.bRem1 = new System.Windows.Forms.Button();
@@ -67,7 +68,6 @@
             this.GV2 = new System.Windows.Forms.DataGridView();
             this.PathScan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Browse = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.prB1 = new System.Windows.Forms.ProgressBar();
             this.tMotor = new System.Windows.Forms.Timer(this.components);
             this.cMS1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -141,13 +141,13 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.prB1);
             this.splitContainer1.Panel1.Controls.Add(this.button1);
             this.splitContainer1.Panel1.Controls.Add(this.chBbaloon);
             this.splitContainer1.Panel1.Controls.Add(this.bRem1);
             this.splitContainer1.Panel1.Controls.Add(this.bAdd1);
             this.splitContainer1.Panel1.Controls.Add(this.Sec);
             this.splitContainer1.Panel1.Controls.Add(this.p1);
-            this.splitContainer1.Panel1.Controls.Add(this.prB1);
             // 
             // splitContainer1.Panel2
             // 
@@ -164,6 +164,17 @@
             this.splitContainer1.Size = new System.Drawing.Size(500, 391);
             this.splitContainer1.SplitterDistance = 210;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // prB1
+            // 
+            this.prB1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.prB1.Location = new System.Drawing.Point(4, 177);
+            this.prB1.Name = "prB1";
+            this.prB1.Size = new System.Drawing.Size(492, 31);
+            this.prB1.TabIndex = 11;
+            this.prB1.UseWaitCursor = true;
+            this.prB1.Visible = false;
             // 
             // button1
             // 
@@ -356,7 +367,7 @@
             // 
             this.chBAutoRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chBAutoRun.AutoSize = true;
-            this.chBAutoRun.Location = new System.Drawing.Point(259, 132);
+            this.chBAutoRun.Location = new System.Drawing.Point(254, 134);
             this.chBAutoRun.Name = "chBAutoRun";
             this.chBAutoRun.Size = new System.Drawing.Size(85, 17);
             this.chBAutoRun.TabIndex = 7;
@@ -476,17 +487,6 @@
             this.Browse.Text = "...";
             this.Browse.ToolTipText = "Обрати папку";
             this.Browse.Width = 50;
-            // 
-            // prB1
-            // 
-            this.prB1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.prB1.Location = new System.Drawing.Point(4, 176);
-            this.prB1.Name = "prB1";
-            this.prB1.Size = new System.Drawing.Size(492, 29);
-            this.prB1.TabIndex = 11;
-            this.prB1.UseWaitCursor = true;
-            this.prB1.Visible = false;
             // 
             // tMotor
             // 

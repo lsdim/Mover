@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Ionic;
+using System.Linq;
 using Ionic.Zip;
 using System.Net;
 using System.Net.Sockets;
@@ -17,10 +17,10 @@ namespace Mover
     {
         public enum Operation
         {
-            Copy = 1,
-            CopyRepl = 11,
-            Move = 2,
-            MoveRepl = 21,
+            Copy = 11,
+            CopyRepl = 1,
+            Move = 21,
+            MoveRepl = 2,
             Delete = 3,
             Run = 4,
             ComandProm = 5,
@@ -157,6 +157,7 @@ namespace Mover
             if (files.Count() == 0)
                 return;
                         
+            //TODO : Check TIME
             switch (oper)
             {
                 case Operation.Copy:
@@ -326,12 +327,14 @@ namespace Mover
             foreach (string f in files)
             {
                 try
-                {  
-                     Process process = new Process();
-                     ProcessStartInfo startInfo = new ProcessStartInfo();
-                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                     startInfo.FileName = "cmd.exe";
-                     startInfo.Arguments = "/c " + commands;
+                {
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo()
+                    {
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        FileName = "cmd.exe",
+                        Arguments = "/c " + commands
+                    };
                      process.StartInfo = startInfo;
                      process.Start();
 
@@ -867,7 +870,7 @@ namespace Mover
                 fs.Seek(0, SeekOrigin.Begin);
 
                 TcpClient tcpC = new TcpClient(IP, 30001);
-                tcpC.SendTimeout=1000;
+               // tcpC.SendTimeout=1000;
                 NetworkStream nts = tcpC.GetStream();
                 BinaryFormatter format = new BinaryFormatter();
                 byte[] buf = new byte[1280];
@@ -884,7 +887,9 @@ namespace Mover
                     //addlog.Debug("Передано {0} байт", count);
                 }
 
-               // string ok = (string)(format.Deserialize(nts));
+              //  string ok = (string)(format.Deserialize(nts));
+
+               // addlog.Info(ok);
 
                 fs.Close();
 
