@@ -13,7 +13,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Mover
 {
-    class MoverWork
+    public class MoverWork
     {
         public enum Operation
         {
@@ -45,9 +45,9 @@ namespace Mover
             public bool IsEveryDay()
             {
                 foreach (bool day in days)
-                    if (day) return true;
+                    if (day) return false;
 
-                return false;
+                return true;
             }
 
             public string GetIP()
@@ -125,6 +125,23 @@ namespace Mover
             }
         }
 
+        public bool InTime(MaskRez elem)
+        {
+            bool rez = false;
+            //TODO : Check TIME
+            if (elem.ttm1 != new TimeSpan(0))
+            {
+                TimeSpan now = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+                int t = now.CompareTo(elem.ttm1);
+                TimeSpan r = elem.ttm1 - now;
+                // if (now.CompareTo(elem.ttm1) == 0)
+                rez = true;
+
+            }
+
+            return rez;
+        }
+
         //Main function
         /// <summary>
         /// Main function that work all job
@@ -134,6 +151,21 @@ namespace Mover
             //Example MoverWork mw = new MoverWork(@"D:\\11111\\22222\\", GV2[1, GV2.Rows.Count - 1].Value.ToString(), "vedo3.XLs;*.det ", MoverWork.Operation.DeleteExcept);
 
             MaskRez elem = Mask(mask);
+
+            
+            if (!elem.IsEveryDay())
+            {
+                if (!elem.days[(int)DateTime.Today.DayOfWeek])
+                    return;
+            }
+
+            //TODO : Check TIME
+            if (!InTime(elem))
+                return;
+
+
+
+
             SearchOption recur = elem.Recurcia ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             string pattern = elem.clear_mask;
 
@@ -157,7 +189,7 @@ namespace Mover
             if (files.Count() == 0)
                 return;
                         
-            //TODO : Check TIME
+            
             switch (oper)
             {
                 case Operation.Copy:
@@ -598,13 +630,13 @@ namespace Mover
 
                 bool[] day = new bool[7]; //get day of week for work
 
-                day[0] = (text.IndexOf("<пн>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[1] = (text.IndexOf("<вт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[2] = (text.IndexOf("<ср>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[3] = (text.IndexOf("<чт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[4] = (text.IndexOf("<пт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[5] = (text.IndexOf("<сб>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
-                day[6] = (text.IndexOf("<нд>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Monday] = (text.IndexOf("<пн>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Tuesday] = (text.IndexOf("<вт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Wednesday] = (text.IndexOf("<ср>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Thursday] = (text.IndexOf("<чт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Friday] = (text.IndexOf("<пт>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Saturday] = (text.IndexOf("<сб>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
+                day[(int)DayOfWeek.Sunday] = (text.IndexOf("<нд>", StringComparison.InvariantCultureIgnoreCase) >= 0) ? true : false;
 
                 rez.days = day;
 

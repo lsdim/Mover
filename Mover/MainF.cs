@@ -57,7 +57,7 @@ namespace Mover
                     urlUPD = "http://10.202.14.15/mover/";
                 }
 
-                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll", "System.Core.dll"/*, "System.Xml.dll", "System.Xml.Linq.dll"*/ };//, "Mover.XmlSerializers.dll" };
+                string[] files = { "NLog.dll", "NLog.config", "NLog.xml", "Ionic.Zip.dll", "System.Core.dll", "Interop.IWshRuntimeLibrary.dll"/*, "System.Xml.dll", "System.Xml.Linq.dll"*/ };//, "Mover.XmlSerializers.dll" };
                 UpdateApl upd = new Mover.UpdateApl(urlUPD, false);
                 upd.DownloadSystemFile(files);
             }
